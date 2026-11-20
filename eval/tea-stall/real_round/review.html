@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>检查 · 20261119_153004 | 玩家视角审查</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #121418; --panel: #1a1d23; --control: #22262e; --line: #2c313b; --text: #e8eaed; --muted: #a3acba;
+  --accent: #4fd1c5; --on-accent: #0b1f1d; --s: #ff8a80; --m: #fbbf24; --l: #b3bac6; --d: #c4b5fd; --w: #93c5fd;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6f8; --panel: #fff; --control: #f3f4f6; --line: #dde1e8; --text: #1c2128; --muted: #566174;
+  --accent: #0f766e; --on-accent: #fff; --s: #c62828; --m: #a04409; --l: #536072; --d: #6d28d9; --w: #1d4ed8;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.65 "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif; }
+main, .bar-inner { width: min(100% - 32px, 960px); margin: auto; }
+main { padding: 30px 0 100px; }
+h1, h2, h3 { line-height: 1.35; margin: 0; }
+h1 { font-size: clamp(1.45rem, 5.5vw, 2rem); }
+h2 { font-size: 1.3rem; margin-bottom: 12px; }
+h3 { font-size: 1.03rem; }
+section { margin-top: 30px; }
+header, .toolbar, .choices, .fix, .bar-inner, .copy-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+header, .fix, .bar-inner { justify-content: space-between; }
+button, select, input, textarea { font: inherit; color: inherit; background: var(--control); border: 1px solid var(--line); border-radius: 8px; padding: 6px 11px; }
+button { cursor: pointer; }
+button:hover, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"], button.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+button:disabled { opacity: .55; cursor: default; }
+a { color: var(--accent); text-underline-offset: 3px; }
+p { margin: 8px 0; }
+.muted, .metadata dt { color: var(--muted); }
+.card, .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.card { padding: 15px; }
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.stat { display: grid; padding: 9px min(2vw, 13px); color: var(--severity); }
+.stat strong { font-size: 1.55rem; }
+.stat span { font-size: .9rem; }
+.sev-S { --severity: var(--s); } .sev-M { --severity: var(--m); } .sev-L { --severity: var(--l); }
+.sev-D { --severity: var(--d); } .sev-W { --severity: var(--w); }
+.summary, .players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.summary { margin-top: 9px; }
+ul, ol { margin: 8px 0; padding-left: 1.5em; }
+.prose, .files, .fix, .metadata dd, .issue-title { overflow-wrap: anywhere; }
+.prose code { background: var(--control); border-radius: 4px; padding: 1px 3px; }
+.prose pre { white-space: pre-wrap; background: var(--control); border-radius: 8px; padding: 9px; }
+.prose .table-wrap { overflow-x: auto; margin: 8px 0; }
+.prose table { border-collapse: collapse; width: 100%; font-size: .95em; }
+.prose th, .prose td { border: 1px solid var(--line, rgba(127,127,127,.35)); padding: 5px 8px; text-align: left; vertical-align: top; }
+.prose th { background: var(--control); font-weight: 600; }
+.metadata { display: grid; grid-template-columns: auto 1fr; gap: 5px 13px; margin: 12px 0 0; }
+.metadata dd { margin: 0; }
+.tag { display: inline-block; font-size: .83rem; font-weight: 600; color: var(--severity, var(--accent)); background: var(--control); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+.toolbar { margin-bottom: 10px; }
+.issue { scroll-margin-top: 14px; margin-bottom: 8px; padding: 0; }
+.issue[open], .issue:target { border-color: var(--accent); }
+.issue summary { cursor: pointer; padding: 11px 13px; }
+.issue-title { font-weight: 600; margin-inline: 8px; }
+.status { display: inline-block; font-size: .86rem; }
+.detail { padding: 0 14px 14px; }
+.choices { margin-top: 12px; }
+.reason { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 9px; }
+.reason input { flex: 1 1 220px; min-width: 0; }
+.fix { margin: 8px 0; }
+footer { position: fixed; inset: auto 0 0; background: var(--panel); border-top: 1px solid var(--line); z-index: 2; padding: 9px 0 max(9px, env(safe-area-inset-bottom)); }
+.fallback { display: grid; gap: 7px; margin: 0 0 9px; width: 100%; }
+.fallback textarea { width: 100%; min-height: 95px; resize: vertical; }
+@media (max-width: 620px) {
+  main, .bar-inner { width: calc(100% - 24px); }
+  main { padding-top: 20px; }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .summary, .players { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-round="20261119_153004" data-storage="7c7ca26ebdf10074d85257c41e41d84bf3847276027cc7641ed9029e8ed914ea">
+<main>
+  <header><h1>检查 · 20261119_153004</h1><button id="theme" type="button">切换浅色</button></header>
+  <p class="muted">在这里点好，复制给你的 AI，它会记下来。</p>
+  <section aria-labelledby="overview">
+    <h2 id="overview">一页纸</h2>
+    <div class="stats"><div class="stat sev-S"><strong>1</strong><span>严重</span></div><div class="stat sev-M"><strong>10</strong><span>中</span></div><div class="stat sev-L"><strong>0</strong><span>轻</span></div><div class="stat sev-D"><strong>2</strong><span>要你定的</span></div><div class="stat sev-W"><strong>5</strong><span>想要但没有的</span></div></div>
+    <div class="summary">
+      <div class="card"><h3>结论</h3><div class="prose"><p>两种桌面礼物都按图片形状点击。末日点中透明处、没有再点并收摊时，礼物会被扫走，铜扣的可点区域尤其小。指南的座位数与摊位配置不同，老周的留宿分支另有按钮措辞、占位词和缺译。两种交易价格计算通过，设置剧透的实际显示时点和角色对白选择还需运行确认。</p><p><strong>对账</strong>：五组 31 条 = 保留 18 条 + 同根合并 13 条 + 误报或不报 0 条 + 已报还在 0 条 + 已修 0 条。保留严重 1、中 10、轻 0、要老板定 2、想要但没有的 5；回归 0。合并前五组报告的 194 处索引引文均核对相符。16 条交给独立核对员各自复走，另两条设计取舍由合并员回作品核对。</p><div class="table-wrap"><table><thead><tr><th>组和走法</th><th>画像</th><th>原报告</th></tr></thead><tbody><tr><td>A 好心人和算账的，画像走查</td><td>1 好心人、2 精明生意人、17 一句一句细读的人</td><td><a href="%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_A.md">A</a></td></tr><tr><td>B 举报和读档，画像走查</td><td>21 举报者、14 反复读档的人、18 点得飞快、不读字的人</td><td><a href="%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_B.md">B</a></td></tr><tr><td>Q 想要的选项</td><td>1 好心人、2 精明生意人、21 举报者、28 对着干的人</td><td><a href="%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_Q.md">Q</a></td></tr><tr><td>S 软锁 / 卡死</td><td>4 马虎的人</td><td><a href="%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_S.md">S</a></td></tr><tr><td>M 经济和数值漏洞</td><td>2 精明生意人</td><td><a href="%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_M.md">M</a></td></tr></tbody></table></div><p>静态检查见 <a href="_summary.md">_summary.md</a>、<a href="_text_checks.md">_text_checks.md</a>、<a href="_image_hits.md">_image_hits.md</a>。作品地图见 <a href="_map/_map.md">_map.md</a>。设计与配置的对应事实已回原文件核对。</p></div></div>
+      <div class="card"><h3>最要紧的问题</h3><ol><li><a href="#issue-1">S1 · 末日礼物点中透明处后，若未补点就收摊，会失去本局领取机会</a></li><li><a href="#issue-2">M1 · 阿婆首访开场说「老样子」</a></li><li><a href="#issue-3">M2 · 折后感谢的双语金额信息不同，中文出现时机和插值待确认</a></li><li><a href="#issue-4">M3 · 设置提示文案可能在第 6 天之前揭晓来历</a></li><li><a href="#issue-5">M4 · 指南写三位，摊位配置两个座位</a></li></ol></div>
+    </div>
+    <dl class="metadata">
+      <dt>待定</dt><dd>18 条等你定</dd>
+      <dt>花费</dt><dd>这一轮是在对话里跑的，没有单独记账</dd>
+      <dt>出处核对</dt><dd>0 处对不上</dd>
+      <dt>报告</dt><dd>没有发现缺失的报告</dd>
+    </dl>
+  </section>
+  <section><h2>玩家说了什么</h2><div class="players"><article class="card"><h3>1 好心人</h3><ul><li>「我答应让他躲一晚，怎么会看到『占位』？铜扣我点了却没收到。阿婆买茶时，我还想请她喝一壶。」 <a class="tag" href="#issue-6">M5</a> <a class="tag" href="#issue-1">S1</a> <a class="tag" href="#issue-13">W2</a></li></ul></article><article class="card"><h3>2 精明生意人</h3><ul><li>「茉莉这单卖不成，我想问她要不要换粗茶。晚上我想按单核对实际收了多少。」（账本显示待确认） <a class="tag" href="#issue-12">W1</a> <a class="tag" href="#issue-16">W5</a></li></ul></article><article class="card"><h3>17 一句一句细读的人</h3><ul><li>「阿婆初次来就说『老样子』，接着又问是不是新开的。说明写最多三位，摊子只有两个座位。设置如果开局能看，我就提前知道老周的身份了。」（设置入口待确认） <a class="tag" href="#issue-2">M1</a> <a class="tag" href="#issue-5">M4</a> <a class="tag" href="#issue-4">M3</a></li></ul></article><article class="card"><h3>21 举报者</h3><ul><li>「前两次见他只能买卖茶，我想试着报官。后来按了『去报官』，隔天只说有人被带走，我想知道是不是我报的那件事。」 <a class="tag" href="#issue-15">W4</a> <a class="tag" href="#issue-14">W3</a></li></ul></article><article class="card"><h3>14 反复读档的人</h3><ul><li>「试拒绝时按钮写『不卖』，英文又少了一句回复。试报官的一趟，就算阿婆送了花，也还是普通结局。」 <a class="tag" href="#issue-7">M6</a> <a class="tag" href="#issue-8">M7</a> <a class="tag" href="#issue-18">D2</a></li></ul></article><article class="card"><h3>18 点得飞快、不读字的人</h3><ul><li>「我点过铜扣，但收摊后桌上和柜里都找不到了。」 <a class="tag" href="#issue-1">S1</a></li></ul></article><article class="card"><h3>4 马虎的人</h3><ul><li>「我点了礼物图边，没留意它还在桌上。收摊后就没了。设置说明要是早就能开，也太早告诉我那人是谁了。」（设置入口待确认） <a class="tag" href="#issue-1">S1</a> <a class="tag" href="#issue-4">M3</a></li></ul></article><article class="card"><h3>28 对着干的人</h3><ul><li>「我拒绝留宿，他说『……知道了。』；另一次答应他，第二天桌上有铜扣。」 </li></ul></article></div></section>
+  <section>
+    <h2>要处理的问题</h2>
+    <div class="toolbar">
+      <label>严重程度 <select id="severity"><option value="">全部</option><option value="S">严重</option><option value="M">中</option><option value="L">轻</option><option value="D">要你定的</option><option value="W">想要但没有的</option></select></label>
+      <label>决定 <select id="decided"><option value="">全部</option><option value="yes">已定</option><option value="no">待定</option></select></label>
+    </div>
+    <details class="issue card" id="issue-1" data-id="S1" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="S" data-duplicate="no"><summary><span class="tag sev-S">S1 · 严重</span><span class="issue-title">末日礼物点中透明处后，若未补点就收摊，会失去本局领取机会</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：严重　把握：【确定】　角色：阿婆、老周　画像：1 好心人、18 点得飞快的人、4 马虎的人</li><li>哪几组报的：A-S1、B-S1、S-S1。</li><li>怎么遇到：第 6 天答应老周留宿，或第 1、3 天各给阿婆少收一次。第 7 天找到桌上的铜扣或花包，点礼物图内的透明处。没有再点中就收摊。两件礼物的路线可以在同一局成立。</li><li>玩家看到：点这一下时，礼物未收进柜里，仍在桌上。收摊扫掉留在桌上的东西，接着本局结束。</li><li>为什么不对：透明像素不接受点击，旧铜扣 32×32 图中只有 60 个非透明像素（5.9%），花包有 624 个（60.9%）。玩家以为已经点取时，最后一天留下的这一份礼物容易错过。</li><li>出处：<code>game/data/settings.json:6</code> 原文 <code>&quot;table&quot;: { &quot;hit&quot;: &quot;pixel&quot;, &quot;sweepAtClose&quot;: true },</code>；<code>game/README.md:21</code> 原文 `<code> - **桌上**：客人送的东西留在桌上。玩家点它，收进柜子。点在图的透明处不算点中（按图的形状判定，</code>table.hit<code> = </code>pixel<code>）。 </code><code>；</code>game/README.md:22<code> 原文 </code><code> - 收摊时，桌上还没收的东西会被扫掉（</code>table.sweepAtClose<code>）。 </code><code>；</code>game/README.md:14<code> 原文 </code>一局 7 天。第 7 天收摊以后出结局。<code>；</code>game/data/characters/zhou.json:14<code> 原文 </code>{ &quot;button&quot;: &quot;btn_shelter&quot;, &quot;sets&quot;: &quot;flag:zhou_sheltered&quot;, &quot;reply&quot;: &quot;zhou_stay_thanks&quot; },<code>；</code>game/data/characters/zhou.json:19<code> 原文 </code>&quot;gift&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;flag:zhou_sheltered&quot;, &quot;item&quot;: &quot;old_button&quot; },<code>；</code>game/data/characters/granny.json:18<code> 原文 </code>&quot;gift&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;item&quot;: &quot;dried_flowers&quot; }<code>；</code>game/data/items.json:5<code> 原文 </code>&quot;dried_flowers&quot;: { &quot;image&quot;: &quot;images\\items\\dried_flowers.png&quot;, &quot;where&quot;: &quot;table&quot; },<code>；</code>game/data/items.json:6<code> 原文 </code>&quot;old_button&quot;: { &quot;image&quot;: &quot;images\\items\\old_button.png&quot;, &quot;where&quot;: &quot;table&quot; }<code>；</code>review_out/20261119_153004/_image_hits.md:17<code> 原文 </code><code> | </code>game\images\items\old_button.png<code> | 32×32 | 2×2 | 5.9%（60 个像素） | 12×12，从 (10,10) 起 | </code><code>；</code>review_out/20261119_153004/_image_hits.md:29<code> 原文 </code><code> | </code>game\images\items\dried_flowers.png<code> | 32×32 | 2×2 | 60.9%（624 个像素） | 24×26，从 (4,3) 起 | </code>`。</li><li>反查与核对：独立复走到第 7 天收摊。<code>game/data/settings.json:6</code> 的 <code>hit:pixel</code> 与 <code>sweepAtClose:true</code> 和 <code>game/README.md:21–22</code> 一致。两张 PNG 的透明像素各为 964 和 400。礼物在收摊前可以再次点取，资料没有给出漏收对结局的额外影响。</li><li>建议：增大桌面礼物的可点区域，如按礼物所在格子判定。另一种做法是收摊前明确提示仍有奖励未收。</li><li>测试步骤：第 1、3 天给阿婆少收，第 6 天答应留宿。第 7 天各点一次图内透明处和可见处，再分别比较未收和已收入柜时的清桌。实际屏幕缩放待有程序后查。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-2" data-id="M1" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M1 · 中</span><span class="issue-title">阿婆首访开场说「老样子」</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【确定】　角色：阿婆　画像：17 一句一句细读的人</li><li>哪几组报的：A-M1。</li><li>怎么遇到：第 1 天接待第一次来的阿婆并读开场。</li><li>玩家看到：首访配置同时列了 <code>granny_first_1</code>「老样子，一壶茉莉。」和 <code>granny_first_2</code>「这摊子是新开的吧？」。</li><li>为什么不对：熟客点单的措辞和初见新摊的语境冲突；两种语言都有类似意思。</li><li>出处：<code>game/data/characters/granny.json:4</code> 原文 <code>&quot;visits&quot;: { &quot;firstDay&quot;: 1, &quot;everyDays&quot;: 2 },</code>；<code>game/data/characters/granny.json:8</code> 原文 <code>&quot;first&quot;: [ &quot;granny_first_1&quot;, &quot;granny_first_2&quot; ],</code>；<code>game/data/characters/granny.json:9</code> 原文 <code>&quot;again&quot;: [ &quot;granny_again_1&quot; ],</code>；<code>game/text/zh.csv:10</code> 原文 <code>granny_first_1,老样子，一壶茉莉。</code>；<code>game/text/zh.csv:11</code> 原文 <code>granny_first_2,这摊子是新开的吧？</code>；<code>game/text/en.csv:10</code> 原文 <code>granny_first_1,The usual. A pot of jasmine.</code>；<code>game/text/en.csv:11</code> 原文 <code>granny_first_2,This stall is new, isn&#x27;t it?</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/granny.json:8–9</code>，首访确实引用两个键，复访另有键。两句在实际界面如何排布未实测。</li><li>建议：第一次来用首次点单的话，把「老样子」留到后续来访。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-3" data-id="M2" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M2 · 中</span><span class="issue-title">折后感谢的双语金额信息不同，中文出现时机和插值待确认</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【可能】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【可能】　角色：阿婆　画像：17 一句一句细读的人、2 精明生意人</li><li>哪几组报的：A-M2、M-L2。</li><li>怎么遇到：第 1 天第一次选「少收一点」，读当场回复，再到第 3 天看回访。用相同路线比较中英文。</li><li>玩家看到：<code>granny_thanks</code> 中文是「上回你少收了我{0}文，我记着呢。」英文是「You charged me less last time. I remember.」，英文没有金额。</li><li>为什么不对：中英给玩家的信息不同。若中文在首次让价后当场出现，「上回」会指向尚未发生的交易；若未插值，玩家读不到金额。</li><li>出处：<code>game/data/characters/granny.json:9</code> 原文 <code>&quot;again&quot;: [ &quot;granny_again_1&quot; ],</code>；<code>game/data/characters/granny.json:10</code> 原文 <code>&quot;afterDiscount&quot;: [ &quot;granny_thanks&quot; ],</code>；<code>game/text/zh.csv:13</code> 原文 <code>granny_thanks,上回你少收了我{0}文，我记着呢。</code>；<code>game/text/en.csv:13</code> 原文 <code>granny_thanks,You charged me less last time. I remember.</code>；<code>game/data/settings.json:4</code> 原文 <code>&quot;discount&quot;: 3,</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/granny.json:9–10</code>，普通回访另有键，中英文同键在第 13 行，只有中文有占位金额。实际时机和插值无法由配置确定。</li><li>建议：确认感谢要放在当场还是回访，用对应时间措辞，并统一两种语言的信息量。</li><li>测试步骤：第 1 天首次少收，记录当场台词；第 3 天回访再记录。检查何时出现感谢，中文金额是否显示 3，英文是否给出同等信息。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-4" data-id="M3" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M3 · 中</span><span class="issue-title">设置提示文案可能在第 6 天之前揭晓来历</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【可能】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【可能】　角色：老周、设置　画像：17 一句一句细读的人、21 举报者、4 马虎的人</li><li>哪几组报的：A-M3、B-M1、S-M1。</li><li>怎么遇到：在第 1–5 天尝试打开「显示提示」的说明，第 6 天再听老周。</li><li>玩家看到：<code>option_hints_tip</code> 直接写「老周是逃兵，他的图标是灰色的。」英文写了「Old Zhou is a deserter, so his icon is grey.」。</li><li>为什么不对：如果这条设置说明在第 6 天前可见，身份会先于角色自述揭晓。</li><li>出处：<code>game/text/zh.csv:4</code> 原文 <code>option_hints_tip,打开以后，客人头上会有小图标。老周是逃兵，他的图标是灰色的。</code>；<code>game/text/en.csv:4</code> 原文 <code>option_hints_tip,When on, guests get a small icon. Old Zhou is a deserter, so his icon is grey.</code>；<code>game/text/zh.csv:22</code> 原文 <code>zhou_ask_1,……我是从营里跑出来的。能在你摊子后面躲一晚吗？</code>；<code>game/data/characters/zhou.json:10</code> 原文 <code>&quot;day6&quot;: [ &quot;zhou_ask_1&quot; ]</code>；<code>game/README.md:29</code> 原文 <code>- 设定：老周的来历在第 6 天以前不能让玩家知道。</code>；<code>project.json:133</code> 原文 <code>&quot;第 6 天以前，玩家看得到的文字里不出现老周的来历。&quot;,</code>。</li><li>反查与核对：独立核对 <code>game/text/zh.csv:4</code>、<code>game/text/en.csv:4</code> 和 <code>game/README.md:29</code>，文案及设定明确。资料未提供显示说明的最早时点。</li><li>建议：设置提示只讲一般图标用途，或在第 6 天自述后才显示角色详情。</li><li>测试步骤：第 1 天进入设置，注意能否读到说明；第 2–5 天逐日比较，并用第 6 天作对照。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-5" data-id="M4" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M4 · 中</span><span class="issue-title">指南写三位，摊位配置两个座位</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【确定】　角色：共用说明、摊位　画像：17 一句一句细读的人、2 精明生意人</li><li>哪几组报的：A-M4、B-M2、M-L1。</li><li>怎么遇到：读第一条茶摊说明，再按摊位容量安排招待。</li><li>玩家看到：<code>guide_page_1</code> 中英都写最多三位，设计说明和配置均写两个座位。</li><li>为什么不对：同一容量在指南与摆摊设计中给出不同数字。</li><li>出处：<code>game/data/settings.json:2</code> 原文 <code>&quot;stall&quot;: { &quot;seats&quot;: 2, &quot;days&quot;: 7 },</code>；<code>game/text/zh.csv:5</code> 原文 <code>guide_page_1,茶摊同时最多招待三位客人。客人等久了会走。</code>；<code>game/text/en.csv:5</code> 原文 <code>guide_page_1,The stall can serve up to three guests at once. Guests leave if they wait too long.</code>；<code>game/README.md:8</code> 原文 `<code> 2. 摆摊。茶摊有两个座位（</code>data\settings.json<code> 的 </code>stall.seats<code>）。 </code><code>；</code>game/data/characters/granny.json:4<code> 原文 </code>&quot;visits&quot;: { &quot;firstDay&quot;: 1, &quot;everyDays&quot;: 2 },<code>；</code>game/data/characters/zhou.json:4<code> 原文 </code>&quot;visits&quot;: { &quot;days&quot;: [ 2, 4, 6 ] },`。</li><li>反查与核对：独立对照 <code>game/data/settings.json:2</code> 和双语表第 5 行，差异成立。现有访问日未提供同日三客路线，实际等待或少卖一单没有证据。</li><li>建议：根据配置把指南的三改为二，并让两个语言版本一致。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-6" data-id="M5" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M5 · 中</span><span class="issue-title">同意留宿后，回复含占位字样</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【确定】　角色：老周　画像：1 好心人、14 反复读档的人</li><li>哪几组报的：A-M5、B-M4。</li><li>怎么遇到：第 6 天老周提出留宿时选「让他躲一晚」。</li><li>玩家看到：<code>zhou_stay_thanks</code> 中文为「（占位）谢谢。」英文为「(placeholder) Thanks.」。</li><li>为什么不对：编辑标记留在已配置的角色回应里。</li><li>出处：<code>game/data/characters/zhou.json:14</code> 原文 <code>{ &quot;button&quot;: &quot;btn_shelter&quot;, &quot;sets&quot;: &quot;flag:zhou_sheltered&quot;, &quot;reply&quot;: &quot;zhou_stay_thanks&quot; },</code>；<code>game/text/zh.csv:24</code> 原文 <code>zhou_stay_thanks,（占位）谢谢。</code>；<code>game/text/en.csv:23</code> 原文 <code>zhou_stay_thanks,(placeholder) Thanks.</code>；<code>game/text/zh.csv:31</code> 原文 <code>btn_shelter,让他躲一晚</code>；<code>game/text/zh.csv:23</code> 原文 <code># 占位：等作者写</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/zhou.json:14</code> 直接引用这个键。中文表第 23 行的段头是注释，标记也确实写进了第 24 行的值。</li><li>建议：为留宿回应提供两种语言的定稿。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-7" data-id="M6" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M6 · 中</span><span class="issue-title">拒绝留宿的中文按钮写「不卖」</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【确定】　角色：老周　画像：2 精明生意人、14 反复读档的人</li><li>哪几组报的：A-M6、B-M3。</li><li>怎么遇到：第 6 天听完留宿请求，读三个答复，尝试拒绝。</li><li>玩家看到：中文选择中有「让他躲一晚」「不卖」「去报官」。拒绝留宿用 <code>btn_refuse</code>，中文值为「不卖」，英文为「Refuse」。</li><li>为什么不对：按钮说的是售茶，玩家此时要回答能否留宿。</li><li>出处：<code>game/data/characters/zhou.json:15</code> 原文 <code>{ &quot;button&quot;: &quot;btn_refuse&quot;, &quot;reply&quot;: &quot;zhou_refused&quot; },</code>；<code>game/text/zh.csv:22</code> 原文 <code>zhou_ask_1,……我是从营里跑出来的。能在你摊子后面躲一晚吗？</code>；<code>game/text/zh.csv:30</code> 原文 <code>btn_refuse,不卖</code>；<code>game/text/zh.csv:31</code> 原文 <code>btn_shelter,让他躲一晚</code>；<code>game/text/zh.csv:32</code> 原文 <code>btn_report,去报官</code>；<code>game/text/en.csv:28</code> 原文 <code>btn_refuse,Refuse</code>；<code>game/README.md:10</code> 原文 <code>4. 玩家有三个按钮：**照价卖**、**少收一点**、**不卖**。</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/zhou.json:15</code> 的按钮和回应、<code>game/text/zh.csv:30</code> 的中文值。交易界面也需要「不卖」。</li><li>建议：给留宿的拒绝选项单独的文字键和措辞。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-8" data-id="M7" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M7 · 中</span><span class="issue-title">拒绝留宿后的回复缺英译</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【确定】　角色：老周　画像：14 反复读档的人、17 一句一句细读的人</li><li>哪几组报的：A-M7、B-M5。</li><li>怎么遇到：用英文走第 6 天留宿分支，选「Refuse」。</li><li>玩家看到：该分支指定 <code>zhou_refused</code>，中文是「……知道了。」，英文表缺此键。</li><li>为什么不对：英文玩家这一步没有对应的英文句子。实际会显示键名、空白还是回退到中文，未提供实现。</li><li>出处：<code>game/data/characters/zhou.json:15</code> 原文 <code>{ &quot;button&quot;: &quot;btn_refuse&quot;, &quot;reply&quot;: &quot;zhou_refused&quot; },</code>；<code>game/text/zh.csv:25</code> 原文 <code>zhou_refused,……知道了。</code>；<code>game/text/en.csv:22</code> 原文 <code>zhou_ask_1,...I ran from the camp. Can I hide behind your stall for a night?</code>；<code>game/text/en.csv:23</code> 原文 <code>zhou_stay_thanks,(placeholder) Thanks.</code>；<code>game/text/en.csv:28</code> 原文 <code>btn_refuse,Refuse</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/zhou.json:15</code>、<code>game/text/zh.csv:25</code> 与英文全表，确认英文键缺失。</li><li>建议：补上对应的英文回复，并走一次英语拒绝分支确认显示。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-9" data-id="M8" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M8 · 中</span><span class="issue-title">阿婆末日送花的英文表值仍是中文</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【确定】　角色：阿婆　画像：17 一句一句细读的人</li><li>哪几组报的：A-M8。</li><li>怎么遇到：用英文，对阿婆至少少收两次，第 6 天不报官，第 7 天读阿婆送花对白。</li><li>玩家看到：<code>granny_last_warm</code> 英文表值是「这是我自己晒的花，你拿去泡。」。</li><li>为什么不对：读英文的玩家可能看不懂送花的来由。</li><li>出处：<code>game/data/characters/granny.json:14</code> 原文 <code>{ &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;line&quot;: &quot;granny_last_warm&quot; }</code>；<code>game/data/characters/granny.json:18</code> 原文 <code>&quot;gift&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;item&quot;: &quot;dried_flowers&quot; }</code>；<code>game/text/zh.csv:16</code> 原文 <code>granny_last_warm,这是我自己晒的花，你拿去泡。</code>；<code>game/text/en.csv:16</code> 原文 <code>granny_last_warm,这是我自己晒的花，你拿去泡。</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/granny.json:14</code> 和 <code>game/text/en.csv:16</code>，触发条件有配置，英文值确实是中文。</li><li>建议：翻译送花台词并检查第 7 天这条对白。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-10" data-id="M9" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M9 · 中</span><span class="issue-title">报官且少收两次后，末日冷暖对白的条件同时满足</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【可能】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【可能】　角色：阿婆、老周　画像：17 一句一句细读的人</li><li>哪几组报的：A-M9。</li><li>怎么遇到：第 1、3 天各给阿婆少收一次，第 6 天去报官，第 7 天读早间小结和阿婆台词。</li><li>玩家看到：<code>granny_last_cold</code> 是「……他们昨夜把人带走了。茶我不喝了。」。<code>granny_last_warm</code> 是「这是我自己晒的花，你拿去泡。」。实际显示哪条待确认。</li><li>为什么不对：两条条件可同时成立，但设计要求被带走只说冷话，否则说家常。若实现会输出所有匹配，玩家可能同时看到互斥的回应。</li><li>出处：<code>game/data/characters/granny.json:13</code> 原文 <code>{ &quot;when&quot;: &quot;flag:zhou_taken&quot;, &quot;line&quot;: &quot;granny_last_cold&quot; },</code>；<code>game/data/characters/granny.json:14</code> 原文 <code>{ &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;line&quot;: &quot;granny_last_warm&quot; }</code>；<code>game/data/characters/granny.json:18</code> 原文 <code>&quot;gift&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;item&quot;: &quot;dried_flowers&quot; }</code>；<code>game/data/characters/zhou.json:16</code> 原文 <code>{ &quot;button&quot;: &quot;btn_report&quot;, &quot;sets&quot;: &quot;flag:zhou_taken&quot; }</code>；<code>game/text/zh.csv:15</code> 原文 <code>granny_last_cold,……他们昨夜把人带走了。茶我不喝了。</code>；<code>game/text/zh.csv:16</code> 原文 <code>granny_last_warm,这是我自己晒的花，你拿去泡。</code>；<code>game/README.md:36</code> 原文 <code>- 阿婆第 7 天说的话要看老周怎样了：他被带走，她说一句冷话；否则说家常。</code>。</li><li>反查与核对：独立核对 <code>game/data/characters/granny.json:13–14</code>、<code>game/data/characters/zhou.json:16</code>。冷话先列，未找到规定匹配顺序的实现；<code>game/README.md:36</code> 写明冷暖取舍。</li><li>建议：在对白条件里写明冷话优先及分支互斥。保留送花条件，另核对当日送礼与对白的先后。</li><li>测试步骤：先凑齐两次少收并报官，第 7 天检查对白条数、顺序和赠礼。再用不报官及第 7 天才达到门槛的两局作对照。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-11" data-id="M10" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M10 · 中</span><span class="issue-title">茉莉照价交易时，余额不足的提示与改选待确认</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【可能】 玩家视角审查_合并.md</p><div class="prose"><ul><li>严重：中　把握：【可能】　角色：阿婆、交易　画像：2 精明生意人</li><li>哪几组报的：M-M1。</li><li>怎么遇到：第 1 天阿婆点茉莉，选择「照价卖」，观察回话、可选按钮和当晚账本。</li><li>玩家看到：阿婆预算 10 文，茉莉标价 12 文。通用按钮含 <code>btn_sell</code>「照价卖」和 <code>btn_discount</code>「少收一点」。点原价后是否说清差额、能否立即改选，待确认。</li><li>为什么不对：若原价操作失败时没有解释或改选入口，玩家难以判断差了多少，以及少收后能否成交。</li><li>出处：<code>game/data/characters/granny.json:5</code> 原文 <code>&quot;wants&quot;: &quot;jasmine&quot;,</code>；<code>game/data/characters/granny.json:6</code> 原文 <code>&quot;budget&quot;: 10,</code>；<code>game/data/settings.json:3</code> 原文 <code>&quot;prices&quot;: { &quot;jasmine&quot;: 12, &quot;coarse&quot;: 4 },</code>；<code>game/data/settings.json:4</code> 原文 <code>&quot;discount&quot;: 3,</code>；<code>game/text/zh.csv:28</code> 原文 <code>btn_sell,照价卖</code>；<code>game/text/zh.csv:29</code> 原文 <code>btn_discount,少收一点</code>；<code>game/README.md:12</code> 原文 <code>6. 夜里看账本：今天赚了多少、谁来过。</code>。</li><li>反查与核对：独立核对 <code>game/data/settings.json:3–4</code> 和 <code>game/data/characters/granny.json:6</code>。原价差 2，折后 9，有普通的少收选项。失败反馈、改选、账本实现缺失。</li><li>建议：若实测失败没有反馈，明示差额并允许改选少收或不卖。</li><li>测试步骤：点原价确认是否显示不足和重选入口，改选少收，再核对当天入账。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-17" data-id="D1" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="D" data-duplicate="no"><summary><span class="tag sev-D">D1 · 要你定的</span><span class="issue-title">连拒两次后阿婆永久离开</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【设计】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【设计】　画像：2 精明生意人、4 马虎的人。</li><li>哪几组报的：A-D1、S-D1。</li><li>怎么遇到：第 1、3 天各按一次「不卖」后，第 5、7 天不再来。第一次有「你今天不卖我……下回再这样，我就不来了。」</li><li>出处：<code>game/data/characters/granny.json:11</code> 原文 <code>&quot;afterRefused&quot;: [ &quot;granny_warn&quot; ],</code>；<code>game/data/characters/granny.json:17</code> 原文 <code>&quot;leaveForever&quot;: { &quot;refusedInARow&quot;: 2 },</code>；<code>game/text/zh.csv:14</code> 原文 <code>granny_warn,你今天不卖我……下回再这样，我就不来了。</code>；<code>game/README.md:27</code> 原文 `<code> - **阿婆**（</code>granny<code>）：每两天来一次，要一壶茉莉。钱不多。连着两次被&quot;不卖&quot;，她就不再来（第一次被拒绝时她会说一句警告）。少收过她两次以上，第 7 天她会送一包自己晒的花。 </code>`。</li><li>核对：合并员回读 <code>game/data/characters/granny.json:11,17</code> 与 <code>game/README.md:27</code>。警告和连续两次离场的门槛明确，未见恢复关系入口。</li></ul><ol><li><strong>建议</strong>　保持当前取舍，第二次拒绝前让后果再清楚出现一次。玩家仍能决定要不要留住关系，快点时也较不易漏听。</li><li>保留首次警告和当前离场逻辑。玩家如果略过警告，第二次后可能不知道为何等不到她。</li><li>给一次恢复关系的机会。固定原价玩法多一个出口，连续拒绝的后果会变轻。</li></ol></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-18" data-id="D2" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="D" data-duplicate="no"><summary><span class="tag sev-D">D2 · 要你定的</span><span class="issue-title">阿婆送花且选择报官时仍是普通结局</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【设计】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【设计】　画像：14 反复读档的人、21 举报者。</li><li>哪几组报的：B-D1。</li><li>怎么遇到：第 1、3 天各少收一次，第 6 天报官。第 7 天分支有早间小结「昨夜有人被带走。」。两次少收满足送花条件，报官仍排除好结局。</li><li>出处：<code>game/data/characters/zhou.json:16</code> 原文 <code>{ &quot;button&quot;: &quot;btn_report&quot;, &quot;sets&quot;: &quot;flag:zhou_taken&quot; }</code>；<code>game/data/characters/zhou.json:20</code> 原文 <code>&quot;summary&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;flag:zhou_taken&quot;, &quot;line&quot;: &quot;summary_taken&quot; }</code>；<code>game/data/characters/granny.json:18</code> 原文 <code>&quot;gift&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;item&quot;: &quot;dried_flowers&quot; }</code>；<code>game/text/zh.csv:33</code> 原文 <code>summary_taken,昨夜有人被带走。</code>；<code>game/README.md:34</code> 原文 <code>- 好结局：阿婆送了花，而且老周没有被带走。</code>；<code>game/README.md:35</code> 原文 <code>- 普通结局：别的情况。</code>。</li><li>核对：合并员回读 <code>game/data/characters/zhou.json:16,20</code>、<code>game/data/characters/granny.json:18</code> 与 <code>game/README.md:34–35</code>。两种条件分开写，报告仅指设计结局。</li></ul><ol><li><strong>建议</strong>　保留现有结局条件，给报官路线一个交代，让玩家明白送花仍有回应，但另一条件未满足。</li><li>保留普通结局而不增加解释。选择的代价明确写在设计里，玩家可能难从结束画面看出缘由。</li><li>单独给报官结果一种结尾。举报有更清楚的叙事结果，需要另外定义它与现有好结局的关系。</li></ol></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details>
+    <p class="muted" id="no-problems" hidden>没有符合条件的问题。</p>
+  </section>
+  <section>
+    <h2>想要但没有的</h2><details class="issue card" id="issue-12" data-id="W1" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W1 · 想要但没有的</span><span class="issue-title">阿婆买不起茉莉时，想问她要不要换粗茶</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定没有】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【确定没有】</li><li>哪几组报的：A-W2、Q-W1。</li><li>谁想要、在哪一步：2 精明生意人，阿婆点茉莉时。</li><li>他想做什么、为什么：以原价卖她付得起的茶。她有 10 文，茉莉 12 文，粗茶 4 文。</li><li>现在有的选项：照价卖、少收一点、不卖。粗茶在货架上，但阿婆订单只指定茉莉。</li><li>没有它会怎样：坚持原价时只能放弃这笔订单；愿让价时原单按 9 文可成交。</li><li>出处：<code>game/README.md:10</code> 原文 <code>4. 玩家有三个按钮：**照价卖**、**少收一点**、**不卖**。</code>；<code>game/data/characters/granny.json:5</code> 原文 <code>&quot;wants&quot;: &quot;jasmine&quot;,</code>；<code>game/data/characters/granny.json:6</code> 原文 <code>&quot;budget&quot;: 10,</code>；<code>game/data/settings.json:3</code> 原文 <code>&quot;prices&quot;: { &quot;jasmine&quot;: 12, &quot;coarse&quot;: 4 },</code>；<code>game/data/settings.json:4</code> 原文 <code>&quot;discount&quot;: 3,</code>；<code>game/data/items.json:4</code> 原文 <code>&quot;coarse&quot;: { &quot;image&quot;: &quot;images\\items\\coarse_brick.png&quot;, &quot;where&quot;: &quot;shelf&quot; },</code>。</li><li>核对：核过 README 菜单、阿婆点单与粗茶入架。搜换茶、改点、swap、substitute 和 choices，没有为阿婆改点的入口。</li><li>可以怎么加：增加提议换茶的选项，让阿婆明确答应后再按粗茶定价。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-13" data-id="W2" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W2 · 想要但没有的</span><span class="issue-title">给客人零价送一壶茶</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定没有】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【确定没有】</li><li>哪几组报的：A-W1、Q-W3。</li><li>谁想要、在哪一步：1 好心人，交易时替客人让利。</li><li>他想做什么、为什么：白送一壶，阿婆的茉莉是最直接的一次。</li><li>现在有的选项：照价卖、少收一点、不卖。固定少收 3 文，茉莉还收 9 文，粗茶还收 1 文。</li><li>没有它会怎样：可以少收，但两个价档都不能降到零。</li><li>出处：<code>game/README.md:10</code> 原文 <code>4. 玩家有三个按钮：**照价卖**、**少收一点**、**不卖**。</code>；<code>game/text/zh.csv:29</code> 原文 <code>btn_discount,少收一点</code>；<code>game/data/settings.json:3</code> 原文 <code>&quot;prices&quot;: { &quot;jasmine&quot;: 12, &quot;coarse&quot;: 4 },</code>；<code>game/data/settings.json:4</code> 原文 <code>&quot;discount&quot;: 3,</code>；<code>game/data/characters/granny.json:18</code> 原文 <code>&quot;gift&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;discounts&gt;=2&quot;, &quot;item&quot;: &quot;dried_flowers&quot; }</code>。</li><li>核对：核过 README 菜单、标价和折扣。搜白送、赠茶、免费、free、gift 和 btn_，只发现客人送花或铜扣的反向动作。</li><li>可以怎么加：如果希望支持免费送茶，增加独立选项，并说明会不会计入关系变化。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-14" data-id="W3" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W3 · 想要但没有的</span><span class="issue-title">报官后看一条对应本次选择的回执</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定没有】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【确定没有】</li><li>哪几组报的：Q-W2。</li><li>谁想要、在哪一步：21 举报者，第 6 天报官后。</li><li>他想做什么、为什么：确认这次举报受理，分得清次日写的是哪次选择。</li><li>现在有的选项：留宿和拒绝有各自回复，报官只配置后续条件。第 7 天早间小结是「昨夜有人被带走。」。</li><li>没有它会怎样：要等到次日，而且小结没有点名，也没写受理经过。</li><li>出处：<code>game/data/characters/zhou.json:14</code> 原文 <code>{ &quot;button&quot;: &quot;btn_shelter&quot;, &quot;sets&quot;: &quot;flag:zhou_sheltered&quot;, &quot;reply&quot;: &quot;zhou_stay_thanks&quot; },</code>；<code>game/data/characters/zhou.json:15</code> 原文 <code>{ &quot;button&quot;: &quot;btn_refuse&quot;, &quot;reply&quot;: &quot;zhou_refused&quot; },</code>；<code>game/data/characters/zhou.json:16</code> 原文 <code>{ &quot;button&quot;: &quot;btn_report&quot;, &quot;sets&quot;: &quot;flag:zhou_taken&quot; }</code>；<code>game/data/characters/zhou.json:20</code> 原文 <code>&quot;summary&quot;: { &quot;day&quot;: 7, &quot;when&quot;: &quot;flag:zhou_taken&quot;, &quot;line&quot;: &quot;summary_taken&quot; }</code>；<code>game/text/zh.csv:32</code> 原文 <code>btn_report,去报官</code>；<code>game/text/zh.csv:33</code> 原文 <code>summary_taken,昨夜有人被带走。</code>。</li><li>核对：独立核对老周分支与日后小结。搜报官、受理、回执、receipt、confirm，未配报官专属即时回执；按键是否有通用视觉反馈未实测。</li><li>可以怎么加：按下后给简短回执，或让次日小结明确接上昨夜的报官选择。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-15" data-id="W4" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W4 · 想要但没有的</span><span class="issue-title">老周前两次来点粗茶时也想试报官</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【确定没有】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【确定没有】</li><li>哪几组报的：B-W1。</li><li>谁想要、在哪一步：21 举报者，第 2、4 天交易时。</li><li>他想做什么、为什么：想调查尚未自述的客人，试探当时去报官会得到什么回应。</li><li>现在有的选项：前两次只有交易的三个按钮。第 6 天留宿请求才配「去报官」。</li><li>没有它会怎样：必须等第 6 天才能报官。这样保留了自述揭晓的时点。</li><li>出处：<code>game/README.md:10</code> 原文 <code>4. 玩家有三个按钮：**照价卖**、**少收一点**、**不卖**。</code>；<code>game/data/characters/zhou.json:4</code> 原文 <code>&quot;visits&quot;: { &quot;days&quot;: [ 2, 4, 6 ] },</code>；<code>game/data/characters/zhou.json:13</code> 原文 <code>&quot;day6&quot;: [</code>；<code>game/data/characters/zhou.json:16</code> 原文 <code>{ &quot;button&quot;: &quot;btn_report&quot;, &quot;sets&quot;: &quot;flag:zhou_taken&quot; }</code>。</li><li>核对：独立核对 README 菜单、老周第 6 天选择及 btn_report 的唯一配置。搜了相关按钮、设置、提示和存读档资料，未发现提前入口。</li><li>可以怎么加：如要支持，可以提前提供泛用的举报尝试，并给证据不足的回话，避免提前说出身份。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details><details class="issue card" id="issue-16" data-id="W5" data-report="玩家视角审查_合并.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W5 · 想要但没有的</span><span class="issue-title">夜里按订单查原价、折扣和实收</span><span class="muted status">待定</span></summary><div class="detail"><p class="muted">【可能没有】 玩家视角审查_合并.md</p><div class="prose"><ul><li>把握：【可能没有】</li><li>哪几组报的：M-W1。</li><li>谁想要、在哪一步：2 精明生意人，少收成交后的夜账。</li><li>他想做什么、为什么：核对某笔茉莉成交是否实收 9 文。</li><li>现在有的选项：设计只给今天赚了多少和谁来过，未列逐笔明细。</li><li>没有它会怎样：按现有设计只能用当日汇总和记忆对账。</li><li>出处：<code>game/README.md:12</code> 原文 <code>6. 夜里看账本：今天赚了多少、谁来过。</code>；<code>game/data/settings.json:4</code> 原文 <code>&quot;discount&quot;: 3,</code>；<code>game/text/zh.csv:29</code> 原文 <code>btn_discount,少收一点</code>。</li><li>核对：独立查过 README 和逐单、流水、账本、ledger、receipt、summary，未找到逐笔字段或入口。没有运行程序，未能确认实际账本是否另有入口。</li><li>可以怎么加：在日账加可展开的订单行，至少显示茶品、标价、优惠和实收。</li></ul></div><div class="choices"><button type="button" data-choice="修" aria-pressed="false">要修</button><button type="button" data-choice="放进待做" aria-pressed="false">以后再说</button><button type="button" data-choice="是设计" aria-pressed="false">本来就这样</button><button type="button" data-choice="不是问题" aria-pressed="false">不是问题</button><button type="button" data-choice="误报" aria-pressed="false">AI 看错了</button></div><label class="reason">原因（可不填） <input type="text" value=""></label></div></details>
+    <p class="muted" id="no-wants" hidden>没有符合条件的条目。</p>
+  </section>
+  
+  
+  <section><h2>文件</h2><ul class="files"><li><a href="./_citations.md">_citations.md</a></li><li><a href="./_image_hits.md">_image_hits.md</a></li><li><a href="./_map/01_%E7%BA%BF.md">_map/01_线.md</a></li><li><a href="./_map/02_%E9%80%89%E6%8B%A9%E7%82%B9.md">_map/02_选择点.md</a></li><li><a href="./_map/03_%E6%A0%87%E8%AE%B0%E5%92%8C%E7%8A%B6%E6%80%81.md">_map/03_标记和状态.md</a></li><li><a href="./_map/04_%E4%B8%9C%E8%A5%BF.md">_map/04_东西.md</a></li><li><a href="./_map/05_%E7%BB%93%E5%B1%80%E5%92%8C%E5%BF%85%E7%BB%8F%E7%82%B9.md">_map/05_结局和必经点.md</a></li><li><a href="./_map/06_%E6%95%B0%E5%80%BC.md">_map/06_数值.md</a></li><li><a href="./_map/07_%E6%96%87%E6%9C%AC.md">_map/07_文本.md</a></li><li><a href="./_map/08_%E4%BA%92%E7%9B%B8%E7%89%B5%E8%BF%9E.md">_map/08_互相牵连.md</a></li><li><a href="./_map/09_%E4%BC%B8%E8%BF%9B%E5%AE%BF%E4%B8%BB%E7%9A%84%E5%9C%B0%E6%96%B9.md">_map/09_伸进宿主的地方.md</a></li><li><a href="./_map/10_%E9%A1%BA%E6%89%8B%E7%9C%8B%E5%88%B0%E7%9A%84.md">_map/10_顺手看到的.md</a></li><li><a href="./_map/11_%E8%AE%BE%E7%BD%AE%E5%92%8C%E4%BE%BF%E5%88%A9.md">_map/11_设置和便利.md</a></li><li><a href="./_map/_map.md">_map/_map.md</a></li><li><a href="./_summary.md">_summary.md</a></li><li><a href="./_text_checks.md">_text_checks.md</a></li><li><a href="./review.md">review.md</a></li><li><a href="./%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_A.md">玩家视角审查_A.md</a></li><li><a href="./%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_B.md">玩家视角审查_B.md</a></li><li><a href="./%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_M.md">玩家视角审查_M.md</a></li><li><a href="./%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_Q.md">玩家视角审查_Q.md</a></li><li><a href="./%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_S.md">玩家视角审查_S.md</a></li><li><a href="./%E7%8E%A9%E5%AE%B6%E8%A7%86%E8%A7%92%E5%AE%A1%E6%9F%A5_%E5%90%88%E5%B9%B6.md">玩家视角审查_合并.md</a></li></ul></section>
+</main>
+<footer>
+  <div class="bar-inner">
+    <div class="fallback" id="fallback" hidden>
+      <label for="copy-text">浏览器没能自动复制，请选中下面的文字复制。</label>
+      <textarea id="copy-text" readonly></textarea>
+      <div><button id="close-copy" type="button">收起复制框</button></div>
+    </div>
+    <span id="copy-status" class="muted" role="status">已选 0 条</span>
+    <button type="button" class="primary" id="copy-decisions" disabled>复制给 AI</button>
+  </div>
+</footer>
+<script>
+'use strict';
+const cards = [...document.querySelectorAll('.issue')];
+const picks = new Map();
+const key = 'prk.review.' + document.body.dataset.storage;
+const words = {"choices": ["修", "放进待做", "是设计", "不是问题", "误报"], "dark": "切换深色", "light": "切换浅色", "pending": "待定", "decided": "已定", "chosen": "已选", "picked": "已选 {n} 条", "copied": "已复制 · 已选 {n} 条", "reason": "（原因：{why}）", "copyHeading": "请把这些决定记进决定记录（轮次 {round}）：", "copyReport": "报告：{report}（请用 --from 指定）"};
+const validChoices = new Set(words.choices);
+const status = document.querySelector('#copy-status');
+const copyButton = document.querySelector('#copy-decisions');
+const fallback = document.querySelector('#fallback');
+const textBox = document.querySelector('#copy-text');
+const themeButton = document.querySelector('#theme');
+
+function stored(name) {
+  try { return localStorage.getItem(name); } catch (error) { return null; }
+}
+function store(name, value) {
+  try { localStorage.setItem(name, value); } catch (error) { /* file URLs may disable storage */ }
+}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  themeButton.textContent = theme === 'light' ? words.dark : words.light;
+}
+setTheme(stored('prk.review.theme') === 'light' ? 'light' : 'dark');
+themeButton.addEventListener('click', () => {
+  const theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  setTheme(theme);
+  store('prk.review.theme', theme);
+});
+
+function choiceKey(card) {
+  return JSON.stringify([card.dataset.report, card.dataset.id]);
+}
+function reasonText(text) {
+  return text.trim().replace(/;/g, '\uFF1B');
+}
+function showChoice(card) {
+  const pick = picks.get(choiceKey(card));
+  const decision = pick ? pick.decision : card.dataset.decision;
+  card.querySelectorAll('[data-choice]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.choice === decision));
+  });
+  card.querySelector('.status').textContent = decision ? (pick ? words.chosen : words.decided) + ' · ' + decision : words.pending;
+}
+function showPicked() {
+  status.textContent = words.picked.replace('{n}', picks.size);
+  copyButton.disabled = picks.size === 0;
+}
+function remember(card, decision, why) {
+  const id = choiceKey(card);
+  if (decision === card.dataset.decision && why === card.dataset.why) picks.delete(id);
+  else picks.set(id, {decision, why});
+  showChoice(card);
+  showPicked();
+  store(key, JSON.stringify(Object.fromEntries(picks)));
+}
+let previous = {};
+try { previous = JSON.parse(stored(key) || '{}') || {}; } catch (error) { /* discard an unreadable draft */ }
+for (const card of cards) {
+  const input = card.querySelector('input');
+  const id = choiceKey(card);
+  const draft = previous[id];
+  if (draft && validChoices.has(draft.decision) && typeof draft.why === 'string' &&
+      (draft.decision !== card.dataset.decision || draft.why !== card.dataset.why)) {
+    picks.set(id, draft);
+    input.value = draft.why;
+  }
+  card.querySelectorAll('[data-choice]').forEach(button => {
+    button.addEventListener('click', () => remember(card, button.dataset.choice, reasonText(input.value)));
+  });
+  input.addEventListener('input', () => {
+    const draft = picks.get(id);
+    if (draft) remember(card, draft.decision, reasonText(input.value));
+  });
+  showChoice(card);
+}
+showPicked();
+
+const severity = document.querySelector('#severity');
+const decided = document.querySelector('#decided');
+function applyFilters() {
+  const visible = {problems: 0, wants: 0};
+  const total = {problems: 0, wants: 0};
+  for (const card of cards) {
+    const category = card.dataset.kind === 'W' ? 'wants' : 'problems';
+    card.hidden = (severity.value && severity.value !== card.dataset.kind) ||
+                  (decided.value && decided.value !== (card.dataset.decision ? 'yes' : 'no'));
+    total[category] += 1;
+    if (!card.hidden) visible[category] += 1;
+  }
+  for (const category of ['problems', 'wants']) {
+    document.getElementById('no-' + category).hidden = !total[category] || visible[category] > 0;
+  }
+}
+severity.addEventListener('change', applyFilters);
+decided.addEventListener('change', applyFilters);
+function openIssue(id) {
+  const card = document.getElementById(id);
+  if (!card || !card.classList.contains('issue')) return;
+  if (card.hidden) {
+    severity.value = '';
+    decided.value = '';
+    applyFilters();
+  }
+  card.open = true;
+  card.scrollIntoView({block: 'start'});
+}
+window.addEventListener('hashchange', () => openIssue(location.hash.slice(1)));
+document.querySelectorAll('a[href^="#issue-"]').forEach(link => {
+  link.addEventListener('click', () => openIssue(link.hash.slice(1)));
+});
+openIssue(location.hash.slice(1));
+
+async function copy(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    fallback.hidden = true;
+    status.textContent = words.copied.replace('{n}', picks.size);
+  } catch (error) {
+    fallback.hidden = false;
+    textBox.value = text;
+    textBox.focus();
+    textBox.select();
+  }
+}
+copyButton.addEventListener('click', () => {
+  const selected = cards.filter(card => picks.has(choiceKey(card)));
+  const grouped = selected.some(card => card.dataset.duplicate === 'yes');
+  const groups = new Map();
+  for (const card of selected) {
+    const row = picks.get(choiceKey(card));
+    const report = grouped ? card.dataset.report : '';
+    const line = card.dataset.id + ' = ' + row.decision + (row.why ? words.reason.replace('{why}', () => row.why) : '');
+    if (!groups.has(report)) groups.set(report, []);
+    groups.get(report).push(line);
+  }
+  const lines = [words.copyHeading.replace('{round}', () => document.body.dataset.round)];
+  for (const [report, rows] of groups) {
+    if (report) lines.push(words.copyReport.replace('{report}', () => report));
+    lines.push(...rows);
+  }
+  copy(lines.join('\n'));
+});
+document.querySelectorAll('[data-copy]').forEach(button => {
+  button.addEventListener('click', () => copy(button.dataset.copy));
+});
+document.querySelector('#close-copy').addEventListener('click', () => { fallback.hidden = true; });
+</script>
+</body>
+</html>

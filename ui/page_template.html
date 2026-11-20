@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="$lang" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>$heading | $label_site_title</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #121418; --panel: #1a1d23; --control: #22262e; --line: #2c313b; --text: #e8eaed; --muted: #a3acba;
+  --accent: #4fd1c5; --on-accent: #0b1f1d; --s: #ff8a80; --m: #fbbf24; --l: #b3bac6; --d: #c4b5fd; --w: #93c5fd;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6f8; --panel: #fff; --control: #f3f4f6; --line: #dde1e8; --text: #1c2128; --muted: #566174;
+  --accent: #0f766e; --on-accent: #fff; --s: #c62828; --m: #a04409; --l: #536072; --d: #6d28d9; --w: #1d4ed8;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.65 "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif; }
+main, .bar-inner { width: min(100% - 32px, 960px); margin: auto; }
+main { padding: 30px 0 100px; }
+h1, h2, h3 { line-height: 1.35; margin: 0; }
+h1 { font-size: clamp(1.45rem, 5.5vw, 2rem); }
+h2 { font-size: 1.3rem; margin-bottom: 12px; }
+h3 { font-size: 1.03rem; }
+section { margin-top: 30px; }
+header, .toolbar, .choices, .fix, .bar-inner, .copy-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+header, .fix, .bar-inner { justify-content: space-between; }
+button, select, input, textarea { font: inherit; color: inherit; background: var(--control); border: 1px solid var(--line); border-radius: 8px; padding: 6px 11px; }
+button { cursor: pointer; }
+button:hover, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"], button.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+button:disabled { opacity: .55; cursor: default; }
+a { color: var(--accent); text-underline-offset: 3px; }
+p { margin: 8px 0; }
+.muted, .metadata dt { color: var(--muted); }
+.card, .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.card { padding: 15px; }
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.stat { display: grid; padding: 9px min(2vw, 13px); color: var(--severity); }
+.stat strong { font-size: 1.55rem; }
+.stat span { font-size: .9rem; }
+.sev-S { --severity: var(--s); } .sev-M { --severity: var(--m); } .sev-L { --severity: var(--l); }
+.sev-D { --severity: var(--d); } .sev-W { --severity: var(--w); }
+.summary, .players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.summary { margin-top: 9px; }
+ul, ol { margin: 8px 0; padding-left: 1.5em; }
+.prose, .files, .fix, .metadata dd, .issue-title { overflow-wrap: anywhere; }
+.prose code { background: var(--control); border-radius: 4px; padding: 1px 3px; }
+.prose pre { white-space: pre-wrap; background: var(--control); border-radius: 8px; padding: 9px; }
+.prose .table-wrap { overflow-x: auto; margin: 8px 0; }
+.prose table { border-collapse: collapse; width: 100%; font-size: .95em; }
+.prose th, .prose td { border: 1px solid var(--line, rgba(127,127,127,.35)); padding: 5px 8px; text-align: left; vertical-align: top; }
+.prose th { background: var(--control); font-weight: 600; }
+.metadata { display: grid; grid-template-columns: auto 1fr; gap: 5px 13px; margin: 12px 0 0; }
+.metadata dd { margin: 0; }
+.tag { display: inline-block; font-size: .83rem; font-weight: 600; color: var(--severity, var(--accent)); background: var(--control); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+.toolbar { margin-bottom: 10px; }
+.issue { scroll-margin-top: 14px; margin-bottom: 8px; padding: 0; }
+.issue[open], .issue:target { border-color: var(--accent); }
+.issue summary { cursor: pointer; padding: 11px 13px; }
+.issue-title { font-weight: 600; margin-inline: 8px; }
+.status { display: inline-block; font-size: .86rem; }
+.detail { padding: 0 14px 14px; }
+.choices { margin-top: 12px; }
+.reason { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 9px; }
+.reason input { flex: 1 1 220px; min-width: 0; }
+.fix { margin: 8px 0; }
+footer { position: fixed; inset: auto 0 0; background: var(--panel); border-top: 1px solid var(--line); z-index: 2; padding: 9px 0 max(9px, env(safe-area-inset-bottom)); }
+.fallback { display: grid; gap: 7px; margin: 0 0 9px; width: 100%; }
+.fallback textarea { width: 100%; min-height: 95px; resize: vertical; }
+@media (max-width: 620px) {
+  main, .bar-inner { width: calc(100% - 24px); }
+  main { padding-top: 20px; }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .summary, .players { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-round="$round_id" data-storage="$storage_key">
+<main>
+  <header><h1>$heading</h1><button id="theme" type="button">$label_light</button></header>
+  <p class="muted">$label_intro</p>
+  <section aria-labelledby="overview">
+    <h2 id="overview">$label_overview</h2>
+    <div class="stats">$numbers</div>
+    <div class="summary">
+      <div class="card"><h3>$label_conclusion</h3>$conclusion</div>
+      <div class="card"><h3>$label_important</h3>$important</div>
+    </div>
+    <dl class="metadata">
+      <dt>$label_pending</dt><dd>$undecided</dd>
+      <dt>$label_cost</dt><dd>$cost</dd>
+      <dt>$label_citations</dt><dd>$citations</dd>
+      <dt>$label_reports</dt><dd>$missing</dd>
+    </dl>
+  </section>
+  <section><h2>$label_feedback</h2>$players</section>
+  <section>
+    <h2>$label_issues</h2>
+    <div class="toolbar">
+      <label>$label_severity <select id="severity"><option value="">$label_all</option>$options</select></label>
+      <label>$label_decision <select id="decided"><option value="">$label_all</option><option value="yes">$label_decided</option><option value="no">$label_pending</option></select></label>
+    </div>
+    $problems
+    <p class="muted" id="no-problems" hidden>$label_no_problems</p>
+  </section>
+  <section>
+    <h2>$label_wants</h2>$wants
+    <p class="muted" id="no-wants" hidden>$label_no_wants</p>
+  </section>
+  $last_round
+  $fixes
+  <section><h2>$label_files</h2><ul class="files">$files</ul></section>
+</main>
+<footer>
+  <div class="bar-inner">
+    <div class="fallback" id="fallback" hidden>
+      <label for="copy-text">$label_copy_fallback</label>
+      <textarea id="copy-text" readonly></textarea>
+      <div><button id="close-copy" type="button">$label_close_copy</button></div>
+    </div>
+    <span id="copy-status" class="muted" role="status">$label_picked</span>
+    <button type="button" class="primary" id="copy-decisions" disabled>$label_copy</button>
+  </div>
+</footer>
+<script>
+'use strict';
+const cards = [...document.querySelectorAll('.issue')];
+const picks = new Map();
+const key = 'prk.review.' + document.body.dataset.storage;
+const words = $script_words;
+const validChoices = new Set(words.choices);
+const status = document.querySelector('#copy-status');
+const copyButton = document.querySelector('#copy-decisions');
+const fallback = document.querySelector('#fallback');
+const textBox = document.querySelector('#copy-text');
+const themeButton = document.querySelector('#theme');
+
+function stored(name) {
+  try { return localStorage.getItem(name); } catch (error) { return null; }
+}
+function store(name, value) {
+  try { localStorage.setItem(name, value); } catch (error) { /* file URLs may disable storage */ }
+}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  themeButton.textContent = theme === 'light' ? words.dark : words.light;
+}
+setTheme(stored('prk.review.theme') === 'light' ? 'light' : 'dark');
+themeButton.addEventListener('click', () => {
+  const theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  setTheme(theme);
+  store('prk.review.theme', theme);
+});
+
+function choiceKey(card) {
+  return JSON.stringify([card.dataset.report, card.dataset.id]);
+}
+function reasonText(text) {
+  return text.trim().replace(/;/g, '\uFF1B');
+}
+function showChoice(card) {
+  const pick = picks.get(choiceKey(card));
+  const decision = pick ? pick.decision : card.dataset.decision;
+  card.querySelectorAll('[data-choice]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.choice === decision));
+  });
+  card.querySelector('.status').textContent = decision ? (pick ? words.chosen : words.decided) + ' · ' + decision : words.pending;
+}
+function showPicked() {
+  status.textContent = words.picked.replace('{n}', picks.size);
+  copyButton.disabled = picks.size === 0;
+}
+function remember(card, decision, why) {
+  const id = choiceKey(card);
+  if (decision === card.dataset.decision && why === card.dataset.why) picks.delete(id);
+  else picks.set(id, {decision, why});
+  showChoice(card);
+  showPicked();
+  store(key, JSON.stringify(Object.fromEntries(picks)));
+}
+let previous = {};
+try { previous = JSON.parse(stored(key) || '{}') || {}; } catch (error) { /* discard an unreadable draft */ }
+for (const card of cards) {
+  const input = card.querySelector('input');
+  const id = choiceKey(card);
+  const draft = previous[id];
+  if (draft && validChoices.has(draft.decision) && typeof draft.why === 'string' &&
+      (draft.decision !== card.dataset.decision || draft.why !== card.dataset.why)) {
+    picks.set(id, draft);
+    input.value = draft.why;
+  }
+  card.querySelectorAll('[data-choice]').forEach(button => {
+    button.addEventListener('click', () => remember(card, button.dataset.choice, reasonText(input.value)));
+  });
+  input.addEventListener('input', () => {
+    const draft = picks.get(id);
+    if (draft) remember(card, draft.decision, reasonText(input.value));
+  });
+  showChoice(card);
+}
+showPicked();
+
+const severity = document.querySelector('#severity');
+const decided = document.querySelector('#decided');
+function applyFilters() {
+  const visible = {problems: 0, wants: 0};
+  const total = {problems: 0, wants: 0};
+  for (const card of cards) {
+    const category = card.dataset.kind === 'W' ? 'wants' : 'problems';
+    card.hidden = (severity.value && severity.value !== card.dataset.kind) ||
+                  (decided.value && decided.value !== (card.dataset.decision ? 'yes' : 'no'));
+    total[category] += 1;
+    if (!card.hidden) visible[category] += 1;
+  }
+  for (const category of ['problems', 'wants']) {
+    document.getElementById('no-' + category).hidden = !total[category] || visible[category] > 0;
+  }
+}
+severity.addEventListener('change', applyFilters);
+decided.addEventListener('change', applyFilters);
+function openIssue(id) {
+  const card = document.getElementById(id);
+  if (!card || !card.classList.contains('issue')) return;
+  if (card.hidden) {
+    severity.value = '';
+    decided.value = '';
+    applyFilters();
+  }
+  card.open = true;
+  card.scrollIntoView({block: 'start'});
+}
+window.addEventListener('hashchange', () => openIssue(location.hash.slice(1)));
+document.querySelectorAll('a[href^="#issue-"]').forEach(link => {
+  link.addEventListener('click', () => openIssue(link.hash.slice(1)));
+});
+openIssue(location.hash.slice(1));
+
+async function copy(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    fallback.hidden = true;
+    status.textContent = words.copied.replace('{n}', picks.size);
+  } catch (error) {
+    fallback.hidden = false;
+    textBox.value = text;
+    textBox.focus();
+    textBox.select();
+  }
+}
+copyButton.addEventListener('click', () => {
+  const selected = cards.filter(card => picks.has(choiceKey(card)));
+  const grouped = selected.some(card => card.dataset.duplicate === 'yes');
+  const groups = new Map();
+  for (const card of selected) {
+    const row = picks.get(choiceKey(card));
+    const report = grouped ? card.dataset.report : '';
+    const line = card.dataset.id + ' = ' + row.decision + (row.why ? words.reason.replace('{why}', () => row.why) : '');
+    if (!groups.has(report)) groups.set(report, []);
+    groups.get(report).push(line);
+  }
+  const lines = [words.copyHeading.replace('{round}', () => document.body.dataset.round)];
+  for (const [report, rows] of groups) {
+    if (report) lines.push(words.copyReport.replace('{report}', () => report));
+    lines.push(...rows);
+  }
+  copy(lines.join('\n'));
+});
+document.querySelectorAll('[data-copy]').forEach(button => {
+  button.addEventListener('click', () => copy(button.dataset.copy));
+});
+document.querySelector('#close-copy').addEventListener('click', () => { fallback.hidden = true; });
+</script>
+</body>
+</html>

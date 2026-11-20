@@ -1,0 +1,33 @@
+# 茶摊：中文文本。每行 键,文字（只按第一个逗号切）。# 开头是注释。
+# ==== 设置和说明 ====
+option_hints,显示提示
+option_hints_tip,打开以后，客人头上会有小图标。老周是逃兵，他的图标是灰色的。
+guide_page_1,茶摊同时最多招待三位客人。客人等久了会走。
+guide_page_2,少收一点，客人会记得。不卖，客人也会记得。
+
+# ==== 阿婆 ====
+granny_name,阿婆
+granny_first_1,老样子，一壶茉莉。
+granny_first_2,这摊子是新开的吧？
+granny_again_1,又来打扰了。今天还是茉莉。
+granny_thanks,上回你少收了我{0}文，我记着呢。
+granny_warn,你今天不卖我……下回再这样，我就不来了。
+granny_last_cold,……他们昨夜把人带走了。茶我不喝了。
+granny_last_warm,这是我自己晒的花，你拿去泡。
+
+# ==== 老周 ====
+zhou_name,客人
+zhou_first_1,粗茶。最便宜的那种。
+zhou_again_1,还是粗茶。
+zhou_ask_1,……我是从营里跑出来的。能在你摊子后面躲一晚吗？
+# 占位：等作者写
+zhou_stay_thanks,（占位）谢谢。
+zhou_refused,……知道了。
+
+# ==== 按钮和小结 ====
+btn_sell,照价卖
+btn_discount,少收一点
+btn_refuse,不卖
+btn_shelter,让他躲一晚
+btn_report,去报官
+summary_taken,昨夜有人被带走。

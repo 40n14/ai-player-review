@@ -1,0 +1,7 @@
+{
+  "_说明": "茶摊里的东西。where = shelf：在货架的格子里，玩家点格子拿起来；table：客人留在桌上，玩家点它收进柜子。image 相对 game 文件夹。",
+  "jasmine": { "image": "images\\items\\jasmine_pot.png", "where": "shelf" },
+  "coarse": { "image": "images\\items\\coarse_brick.png", "where": "shelf" },
+  "dried_flowers": { "image": "images\\items\\dried_flowers.png", "where": "table" },
+  "old_button": { "image": "images\\items\\old_button.png", "where": "table" }
+}

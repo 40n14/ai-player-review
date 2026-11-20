@@ -1,0 +1,8 @@
+{
+  "stall": { "seats": 2, "days": 7 },
+  "prices": { "jasmine": 12, "coarse": 4 },
+  "discount": 3,
+  "shelf": { "hit": "cell" },
+  "table": { "hit": "pixel", "sweepAtClose": true },
+  "hints": { "icon": "images\\ui\\hint_icon.png", "clickable": false }
+}

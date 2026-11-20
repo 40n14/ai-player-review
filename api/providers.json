@@ -1,0 +1,214 @@
+{
+  "_说明": "能接的模型服务商。审查员是一个没有界面的 Claude Code，所以能接的是 Claude Code 能接的：Anthropic 自己的 API、云平台（Bedrock / Vertex / Foundry）、提供 Anthropic 兼容接口的服务商，和把别家模型翻成 Anthropic 格式的网关。这张表只写各家公开的接法；key 放在哪、选哪个模型写在机器设置（local.json）的 providers 里。地址和模型 id 会变：每一项的 docs 是出处，checked 是最后核对的日期，用之前去 docs 再看一眼。来源也列在docs/references.md 第六节。",
+  "_signin说明": "signin: true = 这家可以「用会员额度」：不用钥匙，用这台电脑上那个审查员程序自己登录的账号（prk pay sub，或命令后面加 --pay sub）；signinWith 是给人看的「用谁的登录」。没写 signin 的只能按次付费（用钥匙）。",
+  "_kind说明": "anthropic = Anthropic 自己的 API（key 放进 ANTHROPIC_API_KEY）；compatible = Anthropic 兼容接口或网关（ANTHROPIC_BASE_URL + ANTHROPIC_AUTH_TOKEN，模型 id 写进 ANTHROPIC_MODEL 和各档别名）；bedrock / vertex / foundry = Claude Code 自己支持的云平台开关。",
+  "subscriptionUnsupported": {
+    "gemini": "geminiSigninUnsupported"
+  },
+  "providers": {
+    "anthropic": {
+      "name": "Anthropic（官方 API）",
+      "engine": "claude-code",
+      "kind": "anthropic",
+      "signin": true,
+      "signinWith": "Claude Code",
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-opus-5-5",
+        "claude-haiku-5-5",
+        "claude-fable-5-2"
+      ],
+      "model": "claude-sonnet-5-5",
+      "docs": "https://code.claude.com/docs/en/env-vars",
+      "checked": "2026-11-14",
+      "note": "花费表里的数是 Claude Code 照官方价目算的，和账单一致（赠金和订阅另算，见 README「关于钱」）。"
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://api.deepseek.com/anthropic",
+      "models": [
+        "deepseek-flash[1m]",
+        "deepseek-flash"
+      ],
+      "model": "deepseek-flash[1m]",
+      "smallModel": "deepseek-flash",
+      "docs": "https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code",
+      "checked": "2026-11-14",
+      "note": "页面说：不认识的模型名会映射到 deepseek-flash；claude-opus 开头的映射到 deepseek-v4-pro，按 V4 Pro 的价收。"
+    },
+    "kimi": {
+      "name": "Kimi（月之暗面）",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://api.moonshot.cn/anthropic",
+      "models": [
+        "kimi-k3[1m]"
+      ],
+      "model": "kimi-k3[1m]",
+      "docs": "https://platform.kimi.com/docs/guide/claude-code-kimi.md",
+      "checked": "2026-11-14",
+      "note": "页面的配置用 kimi-k3，测试命令里又写 kimi-k3.1-pro：以控制台能选的为准。页面只给了国内地址。"
+    },
+    "glm": {
+      "name": "智谱 GLM",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://open.bigmodel.cn/api/anthropic",
+      "models": [
+        "glm-5.2[1m]",
+        "glm-4.7"
+      ],
+      "model": "glm-5.2[1m]",
+      "smallModel": "glm-4.7",
+      "env": {
+        "API_TIMEOUT_MS": "3000000"
+      },
+      "docs": "https://docs.bigmodel.cn/cn/guide/develop/claude",
+      "checked": "2026-11-14",
+      "note": "编程套餐（Coding Plan）的 key 和普通 API 的 key 不是一种。"
+    },
+    "minimax": {
+      "name": "MiniMax",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://api.minimax.cn/anthropic",
+      "models": [
+        "MiniMax-M3.1-Flash[1m]"
+      ],
+      "model": "MiniMax-M3.1-Flash[1m]",
+      "docs": "https://platform.minimax.cn/docs/m-plan/claude-code.md",
+      "checked": "2026-11-14",
+      "note": "页面只给了国内地址。"
+    },
+    "qwen": {
+      "name": "通义千问（阿里云百炼，按量付费）",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://dashscope.aliyuncs.com/apps/anthropic",
+      "models": [
+        "qwen3.7-max",
+        "qwen3.6-flash"
+      ],
+      "model": "qwen3.7-max",
+      "smallModel": "qwen3.6-flash",
+      "docs": "https://help.aliyun.com/zh/model-studio/claude-code",
+      "checked": "2026-11-14",
+      "note": "页面正文给的是带工作空间的地址 https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/apps/anthropic，常见问题里给的是这个通用地址：用哪个照你的控制台。编程套餐另有地址和 key（见 qwen-coding）；key 和地址对不上会报 401。"
+    },
+    "qwen-coding": {
+      "name": "通义千问（阿里云百炼，编程套餐）",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+      "models": [
+        "qwen3.7-plus"
+      ],
+      "model": "qwen3.7-plus",
+      "docs": "https://help.aliyun.com/zh/model-studio/claude-code",
+      "checked": "2026-11-14",
+      "note": "要编程套餐的 key。"
+    },
+    "openrouter": {
+      "name": "OpenRouter（聚合，多家模型）",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "https://openrouter.ai/api",
+      "models": [
+        "~anthropic/claude-sonnet-latest[1m]",
+        "~anthropic/claude-opus-latest[1m]",
+        "~anthropic/claude-haiku-latest"
+      ],
+      "model": "~anthropic/claude-sonnet-latest[1m]",
+      "smallModel": "~anthropic/claude-haiku-latest",
+      "docs": "https://openrouter.ai/docs/cookbook/coding-agents/claude-code-integration.md",
+      "checked": "2026-11-14",
+      "note": "页面说只保证 Anthropic 自家的模型能用；换成别家的模型（GPT、Gemini……）要自己试工具调用。"
+    },
+    "gateway": {
+      "name": "自己的网关（LiteLLM 等，用来接 OpenAI、Gemini 这类不是 Anthropic 格式的模型）",
+      "engine": "claude-code",
+      "kind": "compatible",
+      "baseUrl": "",
+      "models": [],
+      "model": "",
+      "docs": "https://code.claude.com/docs/en/llm-gateway",
+      "checked": "2026-11-14",
+      "note": "网关要对外提供 Anthropic Messages 格式的接口。baseUrl 和模型名照你的网关配置写（模型名是网关里起的名字）。别家模型能不能把读文件、搜索这些工具用对，要自己试。"
+    },
+    "bedrock": {
+      "name": "Amazon Bedrock",
+      "engine": "claude-code",
+      "kind": "bedrock",
+      "models": [],
+      "model": "",
+      "docs": "https://code.claude.com/docs/en/amazon-bedrock",
+      "checked": "2026-11-14",
+      "note": "机器设置里写 region（AWS_REGION）和 awsProfile（AWS_PROFILE），或用 apiKeyFile 放 Bedrock 的 API key（AWS_BEARER_TOKEN_BEDROCK）。模型 id 是推理配置文件的 id，例 us.anthropic.claude-sonnet-4-6，照你账号里开通的写。钱记在 AWS 的账单上。"
+    },
+    "vertex": {
+      "name": "Google Cloud（Vertex AI）",
+      "engine": "claude-code",
+      "kind": "vertex",
+      "models": [],
+      "model": "",
+      "docs": "https://code.claude.com/docs/en/google-vertex-ai",
+      "checked": "2026-11-14",
+      "note": "机器设置里写 region（CLOUD_ML_REGION，例 global）和 projectId（ANTHROPIC_VERTEX_PROJECT_ID）；凭据用 gcloud 登录，或 credentialsFile（GOOGLE_APPLICATION_CREDENTIALS）。模型 id 例 claude-haiku-4-5@20251001。钱记在 Google Cloud 的账单上。"
+    },
+    "foundry": {
+      "name": "Microsoft Foundry",
+      "engine": "claude-code",
+      "kind": "foundry",
+      "models": [],
+      "model": "",
+      "docs": "https://code.claude.com/docs/en/microsoft-foundry",
+      "checked": "2026-11-14",
+      "note": "机器设置里写 resource（ANTHROPIC_FOUNDRY_RESOURCE，只写名字）或 baseUrl（ANTHROPIC_FOUNDRY_BASE_URL），key 用 apiKeyFile（ANTHROPIC_FOUNDRY_API_KEY），或者先 az login。模型写部署名。"
+    },
+    "openai": {
+      "name": "OpenAI（GPT，由 Codex CLI 当审查员）",
+      "engine": "codex",
+      "kind": "openai",
+      "signin": true,
+      "signinWith": "Codex（ChatGPT 账号）",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "model": "gpt-6.1-sol",
+      "docs": "https://learn.chatgpt.com/docs/non-interactive-mode",
+      "checked": "2026-11-14",
+      "note": "要先装 Codex CLI（安装方法见 OpenAI 的说明页）。API 模式用 key（运行时放进 CODEX_API_KEY，并用一个干净的 CODEX_HOME，不碰你存着的 ChatGPT 登录）；订阅模式用这台电脑上 codex 自己的 ChatGPT 登录。以只读沙箱运行（-s read-only），报告由工具包写。模型 id 照说明页的例子写的，以你账号能用的为准。"
+    },
+    "google": {
+      "name": "Google Gemini（由 Gemini CLI 当审查员）",
+      "engine": "gemini",
+      "kind": "google",
+      "signin": false,
+      "models": [
+        "gemini-3.1-pro-preview",
+        "gemini-3.5-flash",
+        "auto"
+      ],
+      "model": "",
+      "docs": "https://geminicli.com/docs/cli/headless/",
+      "checked": "2026-11-14",
+      "note": "要先装 Gemini CLI（npm install -g @google/gemini-cli，要 Node.js 20 以上）。key 放进 GEMINI_API_KEY。工具包给它一份自己的设置：拿掉写文件、改文件、跑命令、上网这几样工具，只留读和搜。说明页上写着：2026-06-18 起免费档和 Google One 用户换成了 Antigravity CLI，用 API key 的还能用 Gemini CLI，用之前确认一下。模型不写 = 它自己的默认（auto）。"
+    },
+    "google-vertex": {
+      "name": "Google Vertex AI 上的 Gemini（由 Gemini CLI 当审查员）",
+      "engine": "gemini",
+      "kind": "google-vertex",
+      "models": [
+        "gemini-3.1-pro-preview",
+        "gemini-3.5-flash"
+      ],
+      "model": "",
+      "docs": "https://geminicli.com/docs/get-started/authentication/",
+      "checked": "2026-11-14",
+      "note": "机器设置里写 projectId（GOOGLE_CLOUD_PROJECT）、region（GOOGLE_CLOUD_LOCATION）；凭据用 gcloud 登录，或 credentialsFile（GOOGLE_APPLICATION_CREDENTIALS）。钱记在 Google Cloud 的账单上。"
+    }
+  },
+  "_engine说明": "engine = 谁当审查员：claude-code（默认，Claude Code）、codex（OpenAI 的 Codex CLI，用 GPT）、gemini（Google 的 Gemini CLI）。不是 Claude Code 的两种，工具包让它们只读地跑：要写的文件（报告、草稿、地图）都放在最后的回答里，由 api\\\\engine_run.py 写进这一轮的文件夹。它们没法像 Claude Code 那样用规则挡住\"不许读\"的文件夹，只能在提示里说：机器设置里那家要写 promptOnlyNeverRead: true 才会跑。它们也不报钱数：花费总账里看「按价目表」那一列。"
+}

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Review · 20261119_181306 | Player review</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #121418; --panel: #1a1d23; --control: #22262e; --line: #2c313b; --text: #e8eaed; --muted: #a3acba;
+  --accent: #4fd1c5; --on-accent: #0b1f1d; --s: #ff8a80; --m: #fbbf24; --l: #b3bac6; --d: #c4b5fd; --w: #93c5fd;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6f8; --panel: #fff; --control: #f3f4f6; --line: #dde1e8; --text: #1c2128; --muted: #566174;
+  --accent: #0f766e; --on-accent: #fff; --s: #c62828; --m: #a04409; --l: #536072; --d: #6d28d9; --w: #1d4ed8;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.65 "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif; }
+main, .bar-inner { width: min(100% - 32px, 960px); margin: auto; }
+main { padding: 30px 0 100px; }
+h1, h2, h3 { line-height: 1.35; margin: 0; }
+h1 { font-size: clamp(1.45rem, 5.5vw, 2rem); }
+h2 { font-size: 1.3rem; margin-bottom: 12px; }
+h3 { font-size: 1.03rem; }
+section { margin-top: 30px; }
+header, .toolbar, .choices, .fix, .bar-inner, .copy-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+header, .fix, .bar-inner { justify-content: space-between; }
+button, select, input, textarea { font: inherit; color: inherit; background: var(--control); border: 1px solid var(--line); border-radius: 8px; padding: 6px 11px; }
+button { cursor: pointer; }
+button:hover, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"], button.primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+button:disabled { opacity: .55; cursor: default; }
+a { color: var(--accent); text-underline-offset: 3px; }
+p { margin: 8px 0; }
+.muted, .metadata dt { color: var(--muted); }
+.card, .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.card { padding: 15px; }
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.stat { display: grid; padding: 9px min(2vw, 13px); color: var(--severity); }
+.stat strong { font-size: 1.55rem; }
+.stat span { font-size: .9rem; }
+.sev-S { --severity: var(--s); } .sev-M { --severity: var(--m); } .sev-L { --severity: var(--l); }
+.sev-D { --severity: var(--d); } .sev-W { --severity: var(--w); }
+.summary, .players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.summary { margin-top: 9px; }
+ul, ol { margin: 8px 0; padding-left: 1.5em; }
+.prose, .files, .fix, .metadata dd, .issue-title { overflow-wrap: anywhere; }
+.prose code { background: var(--control); border-radius: 4px; padding: 1px 3px; }
+.prose pre { white-space: pre-wrap; background: var(--control); border-radius: 8px; padding: 9px; }
+.prose .table-wrap { overflow-x: auto; margin: 8px 0; }
+.prose table { border-collapse: collapse; width: 100%; font-size: .95em; }
+.prose th, .prose td { border: 1px solid var(--line, rgba(127,127,127,.35)); padding: 5px 8px; text-align: left; vertical-align: top; }
+.prose th { background: var(--control); font-weight: 600; }
+.metadata { display: grid; grid-template-columns: auto 1fr; gap: 5px 13px; margin: 12px 0 0; }
+.metadata dd { margin: 0; }
+.tag { display: inline-block; font-size: .83rem; font-weight: 600; color: var(--severity, var(--accent)); background: var(--control); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+.toolbar { margin-bottom: 10px; }
+.issue { scroll-margin-top: 14px; margin-bottom: 8px; padding: 0; }
+.issue[open], .issue:target { border-color: var(--accent); }
+.issue summary { cursor: pointer; padding: 11px 13px; }
+.issue-title { font-weight: 600; margin-inline: 8px; }
+.status { display: inline-block; font-size: .86rem; }
+.detail { padding: 0 14px 14px; }
+.choices { margin-top: 12px; }
+.reason { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 9px; }
+.reason input { flex: 1 1 220px; min-width: 0; }
+.fix { margin: 8px 0; }
+footer { position: fixed; inset: auto 0 0; background: var(--panel); border-top: 1px solid var(--line); z-index: 2; padding: 9px 0 max(9px, env(safe-area-inset-bottom)); }
+.fallback { display: grid; gap: 7px; margin: 0 0 9px; width: 100%; }
+.fallback textarea { width: 100%; min-height: 95px; resize: vertical; }
+@media (max-width: 620px) {
+  main, .bar-inner { width: calc(100% - 24px); }
+  main { padding-top: 20px; }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .summary, .players { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-round="20261119_181306" data-storage="0ddfe8a010bbecab8f05f87c6d9cc2538fa18e1a63ee32f68e850fbb85ab555d">
+<main>
+  <header><h1>Review · 20261119_181306</h1><button id="theme" type="button">Switch to light</button></header>
+  <p class="muted">Choose your decisions, then copy them to your AI to record.</p>
+  <section aria-labelledby="overview">
+    <h2 id="overview">Review summary</h2>
+    <div class="stats"><div class="stat sev-S"><strong>1</strong><span>Severe</span></div><div class="stat sev-M"><strong>5</strong><span>Medium</span></div><div class="stat sev-L"><strong>3</strong><span>Minor</span></div><div class="stat sev-D"><strong>2</strong><span>Needs your decision</span></div><div class="stat sev-W"><strong>4</strong><span>Wanted but missing</span></div></div>
+    <div class="summary">
+      <div class="card"><h3>Conclusion</h3><div class="prose"><p>A missed click can leave an earned gift on the table until the final sweep. The design makes Old Zhou&#x27;s one-time button particularly easy to miss, with a hit area of 60 pixels out of 1,024. Readers and traders can encounter a three-seat guide for a two-seat stall, and the authored English dialogue has an untranslated line, a draft reply, and an absent reply. The hint copy contains the day-six reveal. Its availability on earlier days needs an in-game check. The round retained 1 Severe, 5 Medium, 3 Minor, 2 Needs your decision, and 4 Wanted but missing items.</p><ul><li>Scope: The entire seven-day stall loop, both guest routes, shelter/refuse/report, both endings, both table gifts, English and Chinese text, and the supplied settings. This is the first round.</li><li>Review method and inputs: A followed the kindhearted player (1), trader (2), and close reader (17) in <code>player-review_A.md</code>. B followed the reporter (21), repeated reloader (14), and rapid clicker (18) in <code>player-review_B.md</code>. Q checked missing options for the kindhearted player, trader, reporter, and contrarian (28) in <code>player-review_Q.md</code>. S checked progression with the careless player (4) in <code>player-review_S.md</code>. M checked prices and repeat gains with the trader in <code>player-review_M.md</code>.</li><li>Project map and static checks: <code>_map/_map.md</code>, <code>_summary.md</code>, <code>_text_checks.md</code>, <code>_image_hits.md</code>, and <code>_citations.md</code>. All five named reports were present. Their 125 index quotations matched, and 15 consolidated claims were independently checked against the original sources. The game is a design sample with no executable (<code>game/README.md:3</code>).</li><li>Accounting: 28 group entries = 15 retained + 13 duplicates + 0 dismissed group entries + 0 previously reported + 0 resolved. Of 16 group issue entries (S/M/L), 9 remain and 7 were duplicates. Of 5 design entries, 2 remain and 3 were duplicates. Of 7 missing-option entries, 4 remain and 3 were duplicates. Source leads screened out before publication are listed below.</li></ul></div></div>
+      <div class="card"><h3>Top findings</h3><ol><li><a href="#issue-1">S1 · An uncollected gift can be lost at the final close</a></li><li><a href="#issue-2">M1 · Hints help may reveal Old Zhou&#x27;s background early</a></li><li><a href="#issue-3">M2 · The guide advertises three seats for a two-seat stall</a></li><li><a href="#issue-4">M3 · Old Zhou&#x27;s shelter refusal has no English reply</a></li><li><a href="#issue-5">M4 · Old Zhou&#x27;s shelter reply contains a draft marker</a></li></ol></div>
+    </div>
+    <dl class="metadata">
+      <dt>Pending</dt><dd>15 awaiting your decision</dd>
+      <dt>Cost</dt><dd>No separate costs recorded for this round</dd>
+      <dt>Citation check</dt><dd>0 unmatched</dd>
+      <dt>Reports</dt><dd>No missing reports</dd>
+    </dl>
+  </section>
+  <section><h2>Player feedback</h2><div class="players"><article class="card"><h3>1 Kindhearted player</h3><ul><li>“I helped Granny twice and her last line came up in Chinese. I&#x27;d like to give her the tea for free. I&#x27;d also want the button I earned to make it safely into the cabinet.” <a class="tag" href="#issue-6">M5</a> <a class="tag" href="#issue-12">W3</a> <a class="tag" href="#issue-1">S1</a></li></ul></article><article class="card"><h3>2 Trader</h3><ul><li>“I&#x27;d sell Granny the pot for 10 if I could. I passed on two sales at the posted price and she stopped coming. I&#x27;d also expect three seats from what the guide says.” <a class="tag" href="#issue-10">W1</a> <a class="tag" href="#issue-14">D1</a> <a class="tag" href="#issue-3">M2</a></li></ul></article><article class="card"><h3>17 Close reader</h3><ul><li>“Why did she say ‘the usual’ at the new stall? In Chinese, turning down a place to hide reads as refusing a sale. If hints help opens early, it gives away the guest&#x27;s story (to confirm).” <a class="tag" href="#issue-7">L1</a> <a class="tag" href="#issue-8">L2</a> <a class="tag" href="#issue-2">M1</a></li></ul></article><article class="card"><h3>21 Reporter</h3><ul><li>“The recap said someone was taken. I wanted it to confirm who. I could still get Granny&#x27;s flowers after reporting and the ending would be ordinary.” <a class="tag" href="#issue-11">W2</a> <a class="tag" href="#issue-15">D2</a></li></ul></article><article class="card"><h3>14 Repeated reloader</h3><ul><li>“I&#x27;d replay from the day-six choice to check each reply and the ending, including whether the gift returns after a reload.” Save support is unspecified (<code>game/README.md:3</code>). <a class="tag" href="#issue-4">M3</a> <a class="tag" href="#issue-5">M4</a> <a class="tag" href="#issue-15">D2</a> <a class="tag" href="#issue-1">S1</a></li></ul></article><article class="card"><h3>18 Rapid clicker</h3><ul><li>“I tapped near the edge of the button and it stayed on the table. When I closed up, it was gone.” <a class="tag" href="#issue-1">S1</a></li></ul></article><article class="card"><h3>28 Contrarian</h3><ul><li>“After I let him stay, I could keep the button or leave it to the sweep. I wanted to give it back.” <a class="tag" href="#issue-13">W4</a></li></ul></article><article class="card"><h3>4 Careless player</h3><ul><li>“I missed the button and closed without it. I also turned Granny away twice and couldn&#x27;t make it up to her on a later day.” <a class="tag" href="#issue-1">S1</a> <a class="tag" href="#issue-14">D1</a></li></ul></article></div></section>
+  <section>
+    <h2>Issues to review</h2>
+    <div class="toolbar">
+      <label>Severity <select id="severity"><option value="">All</option><option value="S">Severe</option><option value="M">Medium</option><option value="L">Minor</option><option value="D">Needs your decision</option><option value="W">Wanted but missing</option></select></label>
+      <label>Decision <select id="decided"><option value="">All</option><option value="yes">Decided</option><option value="no">Pending</option></select></label>
+    </div>
+    <details class="issue card" id="issue-1" data-id="S1" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="S" data-duplicate="no"><summary><span class="tag sev-S">S1 · Severe</span><span class="issue-title">An uncollected gift can be lost at the final close</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Severe</li><li>Confidence: [Confirmed]</li><li>Reported by: A-S1, B-S1, S-S1</li><li>Character: Old Zhou, Granny, and the stall</li><li>Persona: Kindhearted player (1), rapid clicker (18), careless player (4)</li><li>How you get there: Discount Granny on days one and three and shelter Zhou on day six. On day seven click a transparent part of a gift, leave it on the table, and close.</li><li>What the player sees: The gift stays on the table after the missed click and is absent from the cabinet at the final close. The copper button has 60 nontransparent pixels of 1,024 (5.9%). The flowers have 624 of 1,024 (60.9%).</li><li>Why it is wrong: Pixel-based pickup followed by the final sweep can remove an earned, one-time reward. The button&#x27;s small hit target makes it particularly easy to miss.</li><li>Source: <code>game/README.md:14</code>, <code>game/README.md:21</code>, <code>game/README.md:22</code>, <code>game/data/settings.json:6</code>, <code>game/data/items.json:5</code>, <code>game/data/items.json:6</code>, <code>game/data/characters/zhou.json:19</code>, <code>game/data/characters/granny.json:18</code>, <code>review_out/20261119_181306/_image_hits.md:25</code>, <code>review_out/20261119_181306/_image_hits.md:29</code></li><li>Cross-check: Both gifts use the table hit and sweep rules. Full-cell pickup applies only to shelves. The rules still advance through day-seven close to the ending.</li><li>Verification: Holds for the documented design and both PNGs. The independent count matches the image table. The supplied material has no post-close recovery rule. Live hit drawing, pickup feedback, and save or reload behavior remain to be checked.</li><li>Suggestion: Use a more forgiving table target and warn before sweeping uncollected gifts. Another option is to transfer them to the cabinet at the final close.</li><li>How to reproduce: Earn both gifts, click transparent and opaque pixels, and compare cabinet contents and ending on paired closings. If saving is supported, reload before pickup and after closing.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-2" data-id="M1" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M1 · Medium</span><span class="issue-title">Hints help may reveal Old Zhou&#x27;s background early</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Possible] player-review_merged.md</p><div class="prose"><ul><li>Severity: Medium</li><li>Confidence: [Possible]</li><li>Reported by: A-M2, B-M1, S-M1</li><li>Character: Old Zhou and Settings</li><li>Persona: Close reader (17), reporter (21), careless player (4)</li><li>How you get there: Start a fresh run and expose Show hints help before day six if available.</li><li>What the player sees: The authored <code>option_hints_tip</code> calls him a deserter in both languages.</li><li>Why it is wrong: The help can give away the disclosure that the story reserves for his day-six request.</li><li>Source: <code>game/text/en.csv:4</code>, <code>game/text/en.csv:22</code>, <code>game/text/zh.csv:4</code>, <code>game/README.md:23</code>, <code>game/README.md:29</code>, <code>game/data/characters/zhou.json:10</code>, <code>game/data/settings.json:7</code></li><li>Cross-check: The hints flag marks the icon over a guest as noninteractive. It says nothing about menu access, tooltip timing or default state.</li><li>Verification: Inconclusive for early access. Both text values disclose the identity. Day-six dialogue and the written invariant set the intended timing.</li><li>Suggestion: Describe what the hints setting does without identifying a guest.</li><li>How to reproduce: Inspect launch-menu and in-run help before day six in English and Chinese, with default and toggled hints. Reload if supported and compare with the day-six dialogue.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-3" data-id="M2" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M2 · Medium</span><span class="issue-title">The guide advertises three seats for a two-seat stall</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Medium</li><li>Confidence: [Confirmed]</li><li>Reported by: A-M3, M-M1</li><li>Character: Stall</li><li>Persona: Trader (2), close reader (17)</li><li>How you get there: Read guide page one and compare it with the authored stall capacity.</li><li>What the player sees: Both guide strings say three guests can be served at once.</li><li>Why it is wrong: Players plan from a capacity the stall settings do not provide.</li><li>Source: <code>game/text/en.csv:5</code>, <code>game/text/zh.csv:5</code>, <code>game/data/settings.json:2</code>, <code>game/README.md:8</code></li><li>Cross-check: The design and configuration agree on two seats. The named guests visit on alternating days, so a live queue of three is unproved.</li><li>Verification: Holds. Both localized guide rows disagree with the single configured capacity. No override was found.</li><li>Suggestion: Say two in both guide rows or generate the value from settings. Configure a third seat if the extra capacity is intentional.</li><li>How to reproduce: Check the first guide page in both locales and the number of usable seats in a build.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-4" data-id="M3" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M3 · Medium</span><span class="issue-title">Old Zhou&#x27;s shelter refusal has no English reply</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Medium</li><li>Confidence: [Confirmed]</li><li>Reported by: A-M4, B-M2</li><li>Character: Old Zhou</li><li>Persona: Trader (2), reporter (21) in the branch comparison</li><li>How you get there: On day six, choose Refuse in English after Zhou asks for shelter.</li><li>What the player sees: The choice calls <code>zhou_refused</code>. The English table supplies no row for it.</li><li>Why it is wrong: The authored English branch has no localized acknowledgement for the player&#x27;s answer.</li><li>Source: <code>game/data/characters/zhou.json:15</code>, <code>game/text/zh.csv:25</code>, <code>game/text/en.csv:28</code>, <code>game/README.md:30</code></li><li>Cross-check: The Chinese table has that key. Shelter has its own reply. Refusal sets neither the shelter nor the report flag, and the design says Zhou leaves.</li><li>Verification: Holds for the absent row. The English fallback and actual transition have no supplied implementation.</li><li>Suggestion: Supply the localized refusal reply and check that Zhou can leave after it.</li><li>How to reproduce: Select Refuse in English and Chinese. Capture the reply, any missing-string fallback, and progress through the end of the visit.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-5" data-id="M4" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M4 · Medium</span><span class="issue-title">Old Zhou&#x27;s shelter reply contains a draft marker</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Medium</li><li>Confidence: [Confirmed]</li><li>Reported by: A-L2, B-M3</li><li>Character: Old Zhou</li><li>Persona: Kindhearted player (1), close reader (17), reporter (21) in the branch comparison</li><li>How you get there: Choose Let him stay the night on day six and read the reply.</li><li>What the player sees: The English <code>zhou_stay_thanks</code> value is “(placeholder) Thanks.” The Chinese value also includes a marker.</li><li>Why it is wrong: A visible author marker interrupts the shelter scene.</li><li>Source: <code>game/data/characters/zhou.json:14</code>, <code>game/data/characters/zhou.json:19</code>, <code>game/text/en.csv:23</code>, <code>game/text/zh.csv:23</code>, <code>game/text/zh.csv:24</code></li><li>Cross-check: The shelter choice names this reply directly. No alternative reply is authored. The later gift uses a separate flag check.</li><li>Verification: Holds. The draft marker is literal text in both configured reply values.</li><li>Suggestion: Finalize both reply values and retain the shelter flag.</li><li>How to reproduce: Shelter Zhou in each locale, read his reply, then check that the gift appears on day seven.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-6" data-id="M5" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="M" data-duplicate="no"><summary><span class="tag sev-M">M5 · Medium</span><span class="issue-title">Granny&#x27;s English flower line is still in Chinese</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Medium</li><li>Confidence: [Confirmed]</li><li>Reported by: A-M1</li><li>Character: Granny</li><li>Persona: Kindhearted player (1)</li><li>How you get there: Use English, discount Granny on days one and three, and shelter Zhou on day six. Read her day-seven flower dialogue.</li><li>What the player sees: <code>granny_last_warm</code> says “这是我自己晒的花，你拿去泡。” in both locales.</li><li>Why it is wrong: English readers may miss what Granny brought and how to use it.</li><li>Source: <code>game/data/characters/granny.json:13</code>, <code>game/data/characters/granny.json:14</code>, <code>game/data/characters/granny.json:18</code>, <code>game/data/characters/zhou.json:14</code>, <code>game/data/characters/zhou.json:16</code>, <code>game/text/en.csv:16</code>, <code>game/text/zh.csv:16</code></li><li>Cross-check: The second discount reaches the warm and gift gates, and sheltering avoids the taken flag and cold dialogue predicate.</li><li>Verification: Holds. English and Chinese values match exactly. No English override was found.</li><li>Suggestion: Translate the English row and retain the information about what she dried and how to use it.</li><li>How to reproduce: Repeat the warm route in English and compare the line and gift with the Chinese run.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-7" data-id="L1" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="L" data-duplicate="no"><summary><span class="tag sev-L">L1 · Minor</span><span class="issue-title">Granny&#x27;s first greeting sounds like a repeat visit</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Minor</li><li>Confidence: [Confirmed]</li><li>Reported by: A-L1</li><li>Character: Granny</li><li>Persona: Kindhearted player (1), close reader (17)</li><li>How you get there: Serve Granny on day one and read her two first-visit lines.</li><li>What the player sees: She says “The usual. A pot of jasmine.” and then “This stall is new, isn&#x27;t it?”</li><li>Why it is wrong: The juxtaposition can make a new player wonder whether a prior visit was skipped.</li><li>Source: <code>game/data/characters/granny.json:4</code>, <code>game/data/characters/granny.json:8</code>, <code>game/data/characters/granny.json:9</code>, <code>game/text/en.csv:10</code>, <code>game/text/en.csv:11</code></li><li>Cross-check: Local familiarity or a joke could explain the wording. Later visits have a separate line array.</li><li>Verification: Holds for the first-visit wording. The source leaves her intent open.</li><li>Suggestion: Make the first order more direct, or make her intended joke clear.</li><li>How to reproduce: Read both lines on a fresh run and compare with her repeat greeting.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-8" data-id="L2" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="L" data-duplicate="no"><summary><span class="tag sev-L">L2 · Minor</span><span class="issue-title">The Chinese shelter refusal reads as refusing a sale</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Confirmed] player-review_merged.md</p><div class="prose"><ul><li>Severity: Minor</li><li>Confidence: [Confirmed]</li><li>Reported by: A-L3</li><li>Character: Old Zhou</li><li>Persona: Close reader (17)</li><li>How you get there: Use Chinese and inspect the three buttons after Zhou asks to hide on day six.</li><li>What the player sees: The shared <code>btn_refuse</code> is labeled “不卖” next to the shelter and report choices.</li><li>Why it is wrong: The label describes declining a sale while the player is answering a request for shelter.</li><li>Source: <code>game/data/characters/zhou.json:15</code>, <code>game/text/zh.csv:22</code>, <code>game/text/zh.csv:30</code>, <code>game/text/en.csv:28</code>, <code>game/README.md:10</code></li><li>Cross-check: The same label fits the ordinary sale context. English “Refuse” is usable in both contexts.</li><li>Verification: Holds. The Chinese day-six button reuses the sale label with no authored scene override.</li><li>Suggestion: Supply a shelter-specific Chinese label.</li><li>How to reproduce: Read the sale menu and shelter menu in Chinese and verify that refusing shelter uses the intended text and reply.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-9" data-id="L3" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="L" data-duplicate="no"><summary><span class="tag sev-L">L3 · Minor</span><span class="issue-title">The English thank-you may leave out the discount amount</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Possible] player-review_merged.md</p><div class="prose"><ul><li>Severity: Minor</li><li>Confidence: [Possible]</li><li>Reported by: M-L1</li><li>Character: Granny</li><li>Persona: Trader (2)</li><li>How you get there: Discount Granny on day one, then compare her next greeting and thank-you across English and Chinese.</li><li>What the player sees: The configured English <code>granny_thanks</code> says “You charged me less last time. I remember.” The Chinese value includes <code>{0}</code> for the amount.</li><li>Why it is wrong: If that reply appears, English readers receive less precise feedback about what Granny remembers.</li><li>Source: <code>game/data/characters/granny.json:9</code>, <code>game/data/characters/granny.json:10</code>, <code>game/text/en.csv:13</code>, <code>game/text/zh.csv:13</code></li><li>Cross-check: Both values share the same key. JSON has repeat and after-discount arrays, but provides no priority order or formatting implementation.</li><li>Verification: Inconclusive for visible behavior. The authored amount difference is certain. No formatting exception is established.</li><li>Suggestion: Include the amount in both values if the thank-you is meant to show it.</li><li>How to reproduce: Compare day-three replies after a day-one discount in English and Chinese. Record the chosen line, formatting, and persistence after reload if supported.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-14" data-id="D1" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="D" data-duplicate="no"><summary><span class="tag sev-D">D1 · Needs your decision</span><span class="issue-title">Decide how two refusals should affect Granny&#x27;s route</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Design] player-review_merged.md</p><div class="prose"><ul><li>Severity: Decision</li><li>Confidence: [Design]</li><li>Reported by: A-D1, S-D1, M-D1</li><li>How you get there: Refuse Granny&#x27;s orders on days one and three. Open the stall on day five and continue to the ending.</li><li>What the player sees: The first refusal warns that she will not come back. After two consecutive refusals her visits end. On this path no discounts were given, so the flower gate is unreached.</li><li>Source: <code>game/data/characters/granny.json:4</code>, <code>game/data/characters/granny.json:6</code>, <code>game/data/characters/granny.json:11</code>, <code>game/data/characters/granny.json:17</code>, <code>game/data/characters/granny.json:18</code>, <code>game/text/en.csv:14</code>, <code>game/README.md:14</code>, <code>game/README.md:27</code>, <code>game/README.md:34</code>, <code>game/README.md:35</code></li><li>Verification: Holds. The warning and consecutive-refusal counter implement the design&#x27;s trade-off. The ordinary ending remains available. An unsuccessful payment has unspecified effects.</li><li>Options: 1. Keep deliberate refusals consequential and show the affordable charge before deciding. Players can weigh margin against keeping Granny. 2. Offer a distinct skip option that preserves her visits. Players can decline a sale without ending the relationship. 3. Keep the current warning and rules. Players learn the consequence after the first refusal.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-15" data-id="D2" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="D" data-duplicate="no"><summary><span class="tag sev-D">D2 · Needs your decision</span><span class="issue-title">Decide how to signal the ending cost of reporting</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Design] player-review_merged.md</p><div class="prose"><ul><li>Severity: Decision</li><li>Confidence: [Design]</li><li>Reported by: B-D1, Q-D1</li><li>How you get there: Discount Granny on days one and three, choose Report him on day six, collect the flowers on day seven, and close.</li><li>What the player sees: Reporting sets up the recap. Granny can still bring flowers, but the documented ending for that combination is ordinary.</li><li>Source: <code>game/data/characters/zhou.json:16</code>, <code>game/data/characters/zhou.json:20</code>, <code>game/data/characters/granny.json:13</code>, <code>game/data/characters/granny.json:14</code>, <code>game/data/characters/granny.json:18</code>, <code>game/README.md:34</code>, <code>game/README.md:35</code>, <code>game/text/en.csv:30</code>, <code>game/text/en.csv:31</code></li><li>Verification: Holds. The day-seven gift and report predicates are separate. The good ending requires flowers and that Old Zhou was not taken. Neither the button text nor the supplied choice data signals the ending consequence. Dialogue precedence when both predicates hold needs a playable build.</li><li>Options: 1. Hint at lasting story consequences before reporting. Players get a reason to pause without learning the precise condition. 2. Keep the choice disclosure unchanged and explain the result at the ending. Players discover the consequence later. 3. Give the mixed route its own ending. Players see the helping and reporting choices acknowledged together.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details>
+    <p class="muted" id="no-problems" hidden>No issues match these filters.</p>
+  </section>
+  <section>
+    <h2>Wanted but missing</h2><details class="issue card" id="issue-10" data-id="W1" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W1 · Wanted but missing</span><span class="issue-title">Charge Granny exactly 10</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Definitely missing] player-review_merged.md</p><div class="prose"><ul><li>Severity: Wanted</li><li>Confidence: [Definitely missing]</li><li>Reported by: A-W2, Q-W1, M-W1</li><li>Who wants it: Trader (2), who wants the highest price Granny can pay.</li><li>Where it happens: Granny&#x27;s order screen before making a sale.</li><li>Options today: Sell at price charges 12, Charge less is configured to charge 9, and Refuse ends the sale. Granny has 10.</li><li>Without it: The trader accepts a larger discount than needed or passes on the sale.</li><li>Source: <code>game/README.md:10</code>, <code>game/text/en.csv:26</code>, <code>game/text/en.csv:27</code>, <code>game/text/en.csv:28</code>, <code>game/data/settings.json:3</code>, <code>game/data/settings.json:4</code>, <code>game/data/characters/granny.json:6</code></li><li>Verification: Holds. The three documented choices provide no preset or editable quote at 10. No later price-adjustment entrance was found.</li><li>How to add it: Offer a two-coin reduction or an adjustable price that allows 10, and specify whether it increments the discount counter.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-11" data-id="W2" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W2 · Wanted but missing</span><span class="issue-title">Give explicit feedback on the report</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Definitely missing] player-review_merged.md</p><div class="prose"><ul><li>Severity: Wanted</li><li>Confidence: [Definitely missing]</li><li>Reported by: B-W1, Q-W2</li><li>Who wants it: Reporter (21), who wants to see the result of the report.</li><li>Where it happens: Immediately after reporting and in the day-seven recap.</li><li>Options today: The reporting choice sets the flag with no reply field. The recap says someone was taken. Granny&#x27;s cold line also leaves the person unnamed.</li><li>Without it: The player can infer the outcome. The authored feedback leaves the link to Zhou or to the report implicit.</li><li>Source: <code>game/data/characters/zhou.json:16</code>, <code>game/data/characters/zhou.json:20</code>, <code>game/text/en.csv:15</code>, <code>game/text/en.csv:30</code>, <code>game/text/en.csv:31</code>, <code>game/data/characters/granny.json:13</code></li><li>Verification: Holds for the authored content. No direct confirmation naming Zhou or the action was found in either locale. Actual generic feedback in a playable UI remains unverified.</li><li>How to add it: Add an immediate acknowledgement or let the next-morning recap explicitly connect the report and its outcome.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-12" data-id="W3" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W3 · Wanted but missing</span><span class="issue-title">Give Granny the tea for free</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Definitely missing] player-review_merged.md</p><div class="prose"><ul><li>Severity: Wanted</li><li>Confidence: [Definitely missing]</li><li>Reported by: A-W1</li><li>Who wants it: Kindhearted player (1), who wants to help without charging.</li><li>Where it happens: Granny&#x27;s order screen before choosing how to pay.</li><li>Options today: The menu offers full price, a fixed three-coin discount, or refusal. Gifts shown elsewhere are guest-to-player.</li><li>Without it: The cheapest documented jasmine sale still charges 9.</li><li>Source: <code>game/README.md:10</code>, <code>game/text/en.csv:26</code>, <code>game/text/en.csv:27</code>, <code>game/text/en.csv:28</code>, <code>game/data/settings.json:3</code>, <code>game/data/settings.json:4</code>, <code>game/data/characters/granny.json:18</code></li><li>Verification: Holds. No zero-price tea gift action appeared in the supplied menus, strings or data.</li><li>How to add it: Add a gift action and define whether comping the price counts toward Granny&#x27;s gratitude.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details><details class="issue card" id="issue-13" data-id="W4" data-report="player-review_merged.md" data-decision="" data-why="" data-kind="W" data-duplicate="no"><summary><span class="tag sev-W">W4 · Wanted but missing</span><span class="issue-title">Return the unwanted button to Old Zhou</span><span class="muted status">Pending</span></summary><div class="detail"><p class="muted">[Definitely missing] player-review_merged.md</p><div class="prose"><ul><li>Severity: Wanted</li><li>Confidence: [Definitely missing]</li><li>Reported by: Q-W3</li><li>Who wants it: Contrarian (28), who may offer shelter while wanting to refuse a later reward.</li><li>Where it happens: Day seven, after accepting the shelter request on day six.</li><li>Options today: Table pickup stores the gift in the cabinet, or the closing sweep removes the uncollected gift.</li><li>Without it: Neither action returns the button or lets Old Zhou know the gift was declined.</li><li>Source: <code>game/data/characters/zhou.json:4</code>, <code>game/data/characters/zhou.json:14</code>, <code>game/data/characters/zhou.json:19</code>, <code>game/data/items.json:6</code>, <code>game/data/settings.json:6</code>, <code>game/README.md:21</code>, <code>game/README.md:22</code></li><li>Verification: Holds. No return action, cabinet return, or day-seven Zhou visit is documented.</li><li>How to add it: Offer a return or decline action. If he has already left, offer a way to set the gift aside for him.</li></ul></div><div class="choices"><button type="button" data-choice="fix" aria-pressed="false">Fix</button><button type="button" data-choice="later" aria-pressed="false">Later</button><button type="button" data-choice="by-design" aria-pressed="false">By design</button><button type="button" data-choice="not-an-issue" aria-pressed="false">Not an issue</button><button type="button" data-choice="false-positive" aria-pressed="false">AI got it wrong</button></div><label class="reason">Reason (optional) <input type="text" value=""></label></div></details>
+    <p class="muted" id="no-wants" hidden>No entries match these filters.</p>
+  </section>
+  
+  
+  <section><h2>Files</h2><ul class="files"><li><a href="./_citations.md">_citations.md</a></li><li><a href="./_image_hits.md">_image_hits.md</a></li><li><a href="./_map/01_%E7%BA%BF.md">_map/01_线.md</a></li><li><a href="./_map/02_%E9%80%89%E6%8B%A9%E7%82%B9.md">_map/02_选择点.md</a></li><li><a href="./_map/03_%E6%A0%87%E8%AE%B0%E5%92%8C%E7%8A%B6%E6%80%81.md">_map/03_标记和状态.md</a></li><li><a href="./_map/04_%E4%B8%9C%E8%A5%BF.md">_map/04_东西.md</a></li><li><a href="./_map/05_%E7%BB%93%E5%B1%80%E5%92%8C%E5%BF%85%E7%BB%8F%E7%82%B9.md">_map/05_结局和必经点.md</a></li><li><a href="./_map/06_%E6%95%B0%E5%80%BC.md">_map/06_数值.md</a></li><li><a href="./_map/07_%E6%96%87%E6%9C%AC.md">_map/07_文本.md</a></li><li><a href="./_map/08_%E4%BA%92%E7%9B%B8%E7%89%B5%E8%BF%9E.md">_map/08_互相牵连.md</a></li><li><a href="./_map/10_%E9%A1%BA%E6%89%8B%E7%9C%8B%E5%88%B0%E7%9A%84.md">_map/10_顺手看到的.md</a></li><li><a href="./_map/11_%E8%AE%BE%E7%BD%AE%E5%92%8C%E4%BE%BF%E5%88%A9.md">_map/11_设置和便利.md</a></li><li><a href="./_map/_map.md">_map/_map.md</a></li><li><a href="./_summary.md">_summary.md</a></li><li><a href="./_text_checks.md">_text_checks.md</a></li><li><a href="./player-review_A.md">player-review_A.md</a></li><li><a href="./player-review_B.md">player-review_B.md</a></li><li><a href="./player-review_M.md">player-review_M.md</a></li><li><a href="./player-review_Q.md">player-review_Q.md</a></li><li><a href="./player-review_S.md">player-review_S.md</a></li><li><a href="./player-review_merged.md">player-review_merged.md</a></li><li><a href="./review.md">review.md</a></li></ul></section>
+</main>
+<footer>
+  <div class="bar-inner">
+    <div class="fallback" id="fallback" hidden>
+      <label for="copy-text">Automatic copying failed. Select and copy the text below.</label>
+      <textarea id="copy-text" readonly></textarea>
+      <div><button id="close-copy" type="button">Close copy box</button></div>
+    </div>
+    <span id="copy-status" class="muted" role="status">0 selected</span>
+    <button type="button" class="primary" id="copy-decisions" disabled>Copy for AI</button>
+  </div>
+</footer>
+<script>
+'use strict';
+const cards = [...document.querySelectorAll('.issue')];
+const picks = new Map();
+const key = 'prk.review.' + document.body.dataset.storage;
+const words = {"choices": ["fix", "later", "by-design", "not-an-issue", "false-positive"], "dark": "Switch to dark", "light": "Switch to light", "pending": "Pending", "decided": "Decided", "chosen": "Selected", "picked": "{n} selected", "copied": "Copied · {n} selected", "reason": " (reason: {why})", "copyHeading": "Please record these decisions (round {round}):", "copyReport": "Report: {report} (use --from)"};
+const validChoices = new Set(words.choices);
+const status = document.querySelector('#copy-status');
+const copyButton = document.querySelector('#copy-decisions');
+const fallback = document.querySelector('#fallback');
+const textBox = document.querySelector('#copy-text');
+const themeButton = document.querySelector('#theme');
+
+function stored(name) {
+  try { return localStorage.getItem(name); } catch (error) { return null; }
+}
+function store(name, value) {
+  try { localStorage.setItem(name, value); } catch (error) { /* file URLs may disable storage */ }
+}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  themeButton.textContent = theme === 'light' ? words.dark : words.light;
+}
+setTheme(stored('prk.review.theme') === 'light' ? 'light' : 'dark');
+themeButton.addEventListener('click', () => {
+  const theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  setTheme(theme);
+  store('prk.review.theme', theme);
+});
+
+function choiceKey(card) {
+  return JSON.stringify([card.dataset.report, card.dataset.id]);
+}
+function reasonText(text) {
+  return text.trim().replace(/;/g, '\uFF1B');
+}
+function showChoice(card) {
+  const pick = picks.get(choiceKey(card));
+  const decision = pick ? pick.decision : card.dataset.decision;
+  card.querySelectorAll('[data-choice]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.choice === decision));
+  });
+  card.querySelector('.status').textContent = decision ? (pick ? words.chosen : words.decided) + ' · ' + decision : words.pending;
+}
+function showPicked() {
+  status.textContent = words.picked.replace('{n}', picks.size);
+  copyButton.disabled = picks.size === 0;
+}
+function remember(card, decision, why) {
+  const id = choiceKey(card);
+  if (decision === card.dataset.decision && why === card.dataset.why) picks.delete(id);
+  else picks.set(id, {decision, why});
+  showChoice(card);
+  showPicked();
+  store(key, JSON.stringify(Object.fromEntries(picks)));
+}
+let previous = {};
+try { previous = JSON.parse(stored(key) || '{}') || {}; } catch (error) { /* discard an unreadable draft */ }
+for (const card of cards) {
+  const input = card.querySelector('input');
+  const id = choiceKey(card);
+  const draft = previous[id];
+  if (draft && validChoices.has(draft.decision) && typeof draft.why === 'string' &&
+      (draft.decision !== card.dataset.decision || draft.why !== card.dataset.why)) {
+    picks.set(id, draft);
+    input.value = draft.why;
+  }
+  card.querySelectorAll('[data-choice]').forEach(button => {
+    button.addEventListener('click', () => remember(card, button.dataset.choice, reasonText(input.value)));
+  });
+  input.addEventListener('input', () => {
+    const draft = picks.get(id);
+    if (draft) remember(card, draft.decision, reasonText(input.value));
+  });
+  showChoice(card);
+}
+showPicked();
+
+const severity = document.querySelector('#severity');
+const decided = document.querySelector('#decided');
+function applyFilters() {
+  const visible = {problems: 0, wants: 0};
+  const total = {problems: 0, wants: 0};
+  for (const card of cards) {
+    const category = card.dataset.kind === 'W' ? 'wants' : 'problems';
+    card.hidden = (severity.value && severity.value !== card.dataset.kind) ||
+                  (decided.value && decided.value !== (card.dataset.decision ? 'yes' : 'no'));
+    total[category] += 1;
+    if (!card.hidden) visible[category] += 1;
+  }
+  for (const category of ['problems', 'wants']) {
+    document.getElementById('no-' + category).hidden = !total[category] || visible[category] > 0;
+  }
+}
+severity.addEventListener('change', applyFilters);
+decided.addEventListener('change', applyFilters);
+function openIssue(id) {
+  const card = document.getElementById(id);
+  if (!card || !card.classList.contains('issue')) return;
+  if (card.hidden) {
+    severity.value = '';
+    decided.value = '';
+    applyFilters();
+  }
+  card.open = true;
+  card.scrollIntoView({block: 'start'});
+}
+window.addEventListener('hashchange', () => openIssue(location.hash.slice(1)));
+document.querySelectorAll('a[href^="#issue-"]').forEach(link => {
+  link.addEventListener('click', () => openIssue(link.hash.slice(1)));
+});
+openIssue(location.hash.slice(1));
+
+async function copy(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    fallback.hidden = true;
+    status.textContent = words.copied.replace('{n}', picks.size);
+  } catch (error) {
+    fallback.hidden = false;
+    textBox.value = text;
+    textBox.focus();
+    textBox.select();
+  }
+}
+copyButton.addEventListener('click', () => {
+  const selected = cards.filter(card => picks.has(choiceKey(card)));
+  const grouped = selected.some(card => card.dataset.duplicate === 'yes');
+  const groups = new Map();
+  for (const card of selected) {
+    const row = picks.get(choiceKey(card));
+    const report = grouped ? card.dataset.report : '';
+    const line = card.dataset.id + ' = ' + row.decision + (row.why ? words.reason.replace('{why}', () => row.why) : '');
+    if (!groups.has(report)) groups.set(report, []);
+    groups.get(report).push(line);
+  }
+  const lines = [words.copyHeading.replace('{round}', () => document.body.dataset.round)];
+  for (const [report, rows] of groups) {
+    if (report) lines.push(words.copyReport.replace('{report}', () => report));
+    lines.push(...rows);
+  }
+  copy(lines.join('\n'));
+});
+document.querySelectorAll('[data-copy]').forEach(button => {
+  button.addEventListener('click', () => copy(button.dataset.copy));
+});
+document.querySelector('#close-copy').addEventListener('click', () => { fallback.hidden = true; });
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+  "_说明": "机器设置：这台电脑上的东西，不属于哪个项目，也不属于工具包。复制成 local.json（已经在 .gitignore 里，别提交、别发给别人），或者放在别处、用环境变量 PLAYER_REVIEW_LOCAL 指过去。每一项都可以不写。这里只写 key 在哪，不写 key 本身。",
+  "_python": "跑静态表的 Python（3.8 以上，只用标准库）。不写 = PATH 上的 python。",
+  "python": "",
+  "_claudeExe": "API 模式用的 Claude Code：可执行文件的路径；或一个文件夹（在里面找最新的 claude.exe，装在会换版本号文件夹的地方时用）；不写 = PATH 上的 claude。",
+  "claudeExe": "",
+  "_codexExe": "用 GPT 当审查员时的 Codex CLI、用 Gemini 时的 Gemini CLI 在哪。不写 = PATH 上的 codex / gemini。",
+  "codexExe": "",
+  "geminiExe": "",
+  "_apiKey": "API 模式的 key 从哪来，两种写一种：apiKeyFile = 只放 key 的文本文件（只有 run_api_task.ps1 读它，它所在的文件夹会自动加进「不许读」）；apiKeyEnv = 已经放着 key 的环境变量名。",
+  "apiKeyFile": "",
+  "apiKeyEnv": "",
+  "_apiConfigDir": "API 模式专用的 Claude Code 配置文件夹（里面没有订阅登录）。不写 = %LOCALAPPDATA%\\PlayerReviewKit\\claude-config。",
+  "apiConfigDir": "",
+  "_isolateFromSession": "true（默认）：启动前去掉调用它的会话带来的 CLAUDE_*、ANTHROPIC_* 环境变量。从桌面应用或 IDE 的会话里启动时不去掉的话，这次运行可能被算在那个会话的订阅或额度上，而不是这把 key 上。改了调用方式以后，先花一小笔钱跑一次，去账单页看扣的是哪一种额度，再批量跑。",
+  "isolateFromSession": true,
+  "_defaultModel": "API 模式默认用的模型 id。不写 = Claude Code 自己的默认。",
+  "defaultModel": "",
+  "_providers": "接哪家的模型（工具包认得的在 api\\providers.json：anthropic、deepseek、kimi、glm、minimax、qwen、qwen-coding、openrouter、gateway、bedrock、vertex、foundry，和换审查员的 openai（GPT，Codex CLI）、google、google-vertex（Gemini CLI））。这里每家写 key 放在哪（apiKeyFile 或 apiKeyEnv，不写 key 本身）和要改的设置（model、models、baseUrl、region、projectId、awsProfile、credentialsFile、resource、env）。用 prk provider setup <名字> 问答着写也行。上面的 apiKeyFile / apiKeyEnv / defaultModel 是 anthropic 的旧写法，还认。",
+  "providers": {
+    "deepseek": {
+      "apiKeyFile": "",
+      "apiKeyEnv": ""
+    },
+    "gateway": {
+      "baseUrl": "http://127.0.0.1:4000",
+      "apiKeyEnv": "",
+      "models": [],
+      "model": ""
+    },
+    "openai": {
+      "apiKeyFile": "",
+      "promptOnlyNeverRead": false,
+      "_promptOnlyNeverRead": "GPT（Codex CLI）、Gemini CLI 当审查员时，\"不许读\"的文件夹只能在提示里说，挡不住。接受就写 true，否则有不许读的文件夹时它不跑。"
+    }
+  },
+  "_defaultProvider": "不写 = anthropic。prk provider <名字> 换了会记住，比这里优先。",
+  "defaultProvider": "",
+  "_prices": "价目表：每百万 token 多少钱，币种照各家自己的。花费总账多一列「按价目表」照它算（接别家的模型时，Claude Code 自己估的数不是账单）。键写模型 id，或「服务商/模型 id」；[1m] 这种后缀可以不写。没写的缓存价按输入价算。",
+  "prices": {
+    "_例": {
+      "currency": "CNY",
+      "input": 2,
+      "output": 8,
+      "cacheWrite": 2,
+      "cacheRead": 0.5
+    }
+  },
+  "_modelChoices": "换模型时列出来给人选的 id（prk model、页面的设置）。只是方便选，别的 id 也可以直接写。模型会出新的：照你的账号能用的改这张表。",
+  "modelChoices": [
+    "claude-sonnet-5-5",
+    "claude-opus-5-5",
+    "claude-haiku-5-5",
+    "claude-fable-5-2"
+  ],
+  "_neverRead": "整台电脑上审查员都不许读、列、搜的文件夹（放密钥、私人资料的地方）。每个项目自己的写在项目设置的 neverRead。",
+  "neverRead": []
+}

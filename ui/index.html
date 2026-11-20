@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>玩家视角审查</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234fd1c5'/%3E%3Cstop offset='1' stop-color='%2360a5fa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Cpath d='M16 7l9 9-9 9-9-9z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #121418; --panel: #1a1d23; --panel2: #22262e; --side: #16181d; --line: #2c313b; --text: #e8eaed; --dim: #9aa3b2; --accent: #4fd1c5;
+  --accent-bg: #163331; --s: #ff8a80; --s-bg: #3a1f1f; --m: #fbbf24; --m-bg: #3a2e14; --l: #b3bac6; --l-bg: #2a2f38;
+  --d: #c4b5fd; --d-bg: #2c2444; --w: #93c5fd; --w-bg: #1b2a47; --good: #86efac; --good-bg: #173022; --pri-text: #0b1f1d;
+}
+:root[data-theme=light] {
+  --bg: #f5f6f8; --panel: #ffffff; --panel2: #f3f4f6; --side: #eef0f3; --line: #e0e3e8; --text: #1c2128; --dim: #667085; --accent: #0f766e;
+  --accent-bg: #e3f3f1; --s: #c62828; --s-bg: #fdecea; --m: #b45309; --m-bg: #fdf3e2; --l: #6b7280; --l-bg: #eef0f3;
+  --d: #6d28d9; --d-bg: #f1eafd; --w: #1d4ed8; --w-bg: #e8effd; --good: #15803d; --good-bg: #e7f6ec; --pri-text: #ffffff;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.7 "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+select, input[type=text], input[type=number], textarea { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+.btn { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.pri { background: var(--accent); border-color: var(--accent); color: var(--pri-text); font-weight: 600; }
+.btn.big { padding: 10px 22px; font-size: 16px; }
+.btn.sm { padding: 2px 10px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.app { display: grid; grid-template-columns: 220px minmax(0, 1fr); height: 100vh; }
+.app.chat-on { grid-template-columns: 220px minmax(0, 1fr) 5px var(--chatw, 400px); }
+.drag { cursor: col-resize; background: transparent; border-left: 1px solid var(--line); display: none; }
+.app.chat-on .drag { display: block; }
+.drag:hover, .drag.on { background: var(--accent-bg); }
+.side { background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 14px 10px; gap: 4px; min-height: 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; padding: 0 6px 10px; }
+.logo { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--w)); display: grid; place-items: center; color: var(--pri-text); font-size: 14px; }
+.side .lbl { font-size: 12px; color: var(--dim); padding: 6px 8px 2px; }
+.side select { width: 100%; margin-bottom: 8px; }
+.nav { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 9px; cursor: pointer; }
+.nav:hover { background: var(--panel2); }
+.nav.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+.nav .ic { width: 20px; text-align: center; }
+.nav .n { margin-left: auto; font-size: 12px; min-width: 22px; text-align: center; border-radius: 10px; background: var(--s-bg); color: var(--s); padding: 0 6px; }
+.side .grow { flex: 1; }
+.main { overflow: auto; min-width: 0; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 26px 28px 60px; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 17px; margin: 0 0 10px; }
+.sub { color: var(--dim); margin: 0 0 18px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row2 > .card { margin-bottom: 0; }
+@media (max-width: 900px) { .row2 { grid-template-columns: 1fr; } .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .side { flex-direction: row; flex-wrap: wrap; } .side .grow, .side .lbl { display: none; } .nav { width: auto; } }
+.note { background: var(--m-bg); color: var(--m); border-radius: 10px; padding: 8px 14px; margin-bottom: 16px; font-size: 14px; }
+.next { border: 2px solid var(--accent); }
+.next .what { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 6px 0 12px; }
+.num { border-radius: 12px; padding: 12px 14px; cursor: pointer; }
+.num b { display: block; font-size: 30px; line-height: 1.1; }
+.num span { font-size: 13px; }
+.kS { color: var(--s); background: var(--s-bg); } .kM { color: var(--m); background: var(--m-bg); } .kL { color: var(--l); background: var(--l-bg); }
+.kD { color: var(--d); background: var(--d-bg); } .kW { color: var(--w); background: var(--w-bg); }
+.prog { height: 8px; background: var(--l-bg); border-radius: 4px; overflow: hidden; margin: 6px 0; }
+.prog i { display: block; height: 100%; background: var(--accent); }
+.prog.warn i { background: var(--m); } .prog.over i { background: var(--s); }
+.usage { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 7px 10px; margin: 0 0 6px; cursor: pointer; font-size: 13px; line-height: 1.5; }
+.usage:hover { border-color: var(--accent); }
+.usage .sm { color: var(--dim); font-size: 12px; }
+.usage .prog { height: 6px; margin: 4px 0 2px; }
+.fix { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+.fix .item { gap: 10px; }
+.fix .fx { padding: 2px 16px 6px; border-top: 1px dashed var(--line); }
+.fixbtns { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 14px 12px; }
+.cmd { display: flex; align-items: center; gap: 8px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px 6px 12px; margin: 8px 0; font-family: Consolas, "Cascadia Mono", monospace; font-size: 13px; }
+.cmd code { flex: 1; overflow-x: auto; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; border-radius: 6px; padding: 0 8px; line-height: 22px; white-space: nowrap; }
+.t-money { background: var(--m-bg); color: var(--m); } .t-free { background: var(--good-bg); color: var(--good); } .t-sub { background: var(--w-bg); color: var(--w); }
+.t-bad { background: var(--s-bg); color: var(--s); } .t-warn { background: var(--m-bg); color: var(--m); } .t-want { background: var(--w-bg); color: var(--w); }
+.t-good { background: var(--good-bg); color: var(--good); } .t-gray { background: var(--l-bg); color: var(--l); } .t-dec { background: var(--accent-bg); color: var(--accent); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; background: var(--l); }
+.dot.ok { background: var(--good); } .dot.no { background: var(--s); }
+.steps { counter-reset: s; }
+.step { position: relative; padding: 4px 0 14px 40px; }
+.step::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 4px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; font-weight: 700; }
+.step b { display: block; margin-bottom: 2px; }
+.players { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.players .card { margin: 0; }
+.say { display: flex; gap: 10px; padding: 8px 0; border-top: 1px dashed var(--line); align-items: flex-start; }
+.say:first-of-type { border-top: 0; }
+a.ref { font-size: 12px; border-radius: 5px; padding: 0 6px; margin: 0 2px; cursor: pointer; font-weight: 600; text-decoration: none; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--panel); border-radius: 16px; padding: 3px 12px; cursor: pointer; font-size: 14px; }
+.chip.on { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.split { display: grid; grid-template-columns: minmax(280px, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .split { grid-template-columns: 1fr; } }
+.list { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.item { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); cursor: pointer; }
+.item:first-child { border-top: 0; }
+.item:hover { background: var(--panel2); } .item.on { background: var(--accent-bg); }
+.item .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sev { font-size: 12px; border-radius: 6px; padding: 0 8px; white-space: nowrap; }
+.decide { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 12px 0; padding: 12px; background: var(--panel2); border-radius: 12px; }
+.decide input { flex: 1; min-width: 180px; }
+.md h1, .md h2, .md h3, .md h4 { margin: 14px 0 6px; font-size: 15px; }
+.md p { margin: 6px 0; } .md ul, .md ol { margin: 6px 0; padding-left: 22px; }
+.md blockquote { margin: 6px 0; padding: 2px 12px; border-left: 3px solid var(--line); color: var(--dim); }
+code { background: var(--panel2); border-radius: 5px; padding: 0 5px; font-family: Consolas, "Cascadia Mono", monospace; font-size: 13px; }
+pre { background: var(--panel2); border-radius: 10px; padding: 10px 12px; overflow: auto; white-space: pre-wrap; word-break: break-word; font-size: 13px; }
+pre code { padding: 0; }
+.tw { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 14px; }
+th, td { border-bottom: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+th { color: var(--dim); font-weight: 600; white-space: nowrap; }
+details > summary { cursor: pointer; color: var(--dim); margin: 6px 0; }
+.empty { color: var(--dim); text-align: center; padding: 40px 10px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.files .f { padding: 7px 12px; cursor: pointer; border-radius: 8px; word-break: break-all; }
+.files .f:hover { background: var(--panel2); } .files .f.on { background: var(--accent-bg); color: var(--accent); }
+.files .g { font-size: 12px; color: var(--dim); padding: 10px 12px 2px; }
+.opt { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; cursor: pointer; margin-bottom: 8px; }
+.opt.on { border-color: var(--accent); background: var(--accent-bg); }
+.opt small { display: block; color: var(--dim); }
+/* the side chat */
+.chat { background: var(--panel); display: none; flex-direction: column; min-width: 0; min-height: 0; }
+.app.chat-on .chat { display: flex; }
+.chat .hd { display: flex; align-items: center; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.chat .hd b { flex: 1; font-size: 15px; }
+.icon { width: 30px; height: 30px; border-radius: 8px; border: 0; background: none; cursor: pointer; color: var(--dim); display: grid; place-items: center; font-size: 15px; }
+.icon:hover { background: var(--panel2); color: var(--text); }
+.chat .log { flex: 1; overflow: auto; padding: 16px 16px 8px; }
+.hello { color: var(--dim); text-align: center; padding: 30px 8px 10px; }
+.hello b { display: block; color: var(--text); font-size: 17px; margin-bottom: 6px; }
+.sugg { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.sugg button { text-align: left; border: 1px solid var(--line); background: var(--panel2); border-radius: 12px; padding: 9px 12px; cursor: pointer; }
+.sugg button:hover { border-color: var(--accent); }
+.you { display: flex; justify-content: flex-end; margin: 4px 0 14px; }
+.you div { background: var(--panel2); border-radius: 16px; padding: 8px 14px; max-width: 85%; white-space: pre-wrap; word-break: break-word; }
+.ai { margin: 0 0 18px; }
+.ai .md p:first-child { margin-top: 0; }
+.ai .bar { display: flex; gap: 4px; align-items: center; color: var(--dim); font-size: 12px; margin-top: 2px; }
+.ai.err { color: var(--s); }
+.think { color: var(--dim); display: flex; align-items: center; gap: 8px; margin: 0 0 14px; }
+.composer { margin: 8px 12px 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel2); padding: 8px 8px 6px 12px; }
+.composer:focus-within { border-color: var(--accent); }
+.composer textarea { width: 100%; border: 0; background: none; resize: none; outline: none; padding: 4px 0; min-height: 24px; max-height: 200px; line-height: 1.6; }
+.composer .tools { display: flex; align-items: center; gap: 6px; }
+.composer select { border: 0; background: none; color: var(--dim); font-size: 13px; padding: 2px 4px; border-radius: 6px; cursor: pointer; }
+.composer select:hover { background: var(--panel); color: var(--text); }
+.composer .sp { flex: 1; }
+.send { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--accent); color: var(--pri-text); cursor: pointer; font-size: 16px; font-weight: 700; display: grid; place-items: center; }
+.send:disabled { background: var(--line); color: var(--dim); cursor: default; }
+.hint { color: var(--dim); font-size: 12px; text-align: center; margin: -4px 12px 10px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 7px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 9; }
+.toast.on { opacity: .92; }
+/* the confirm box, the small box of a running check, forms */
+.modal-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, .45); display: grid; place-items: center; z-index: 8; padding: 16px; }
+.modal { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; width: min(580px, 100%); max-height: calc(100vh - 32px); overflow: auto; }
+.modal p { margin: 8px 0; }
+.modal .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.jobbox { display: block; width: 100%; text-align: left; border: 1px solid var(--accent); background: var(--accent-bg); color: var(--accent); border-radius: 10px; padding: 7px 10px; margin: 0 0 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.jobbox .prog { height: 6px; margin: 4px 0 2px; }
+.t-row { display: flex; gap: 10px; align-items: center; padding: 5px 0; border-top: 1px dashed var(--line); }
+.t-row:first-child { border-top: 0; }
+.form label.f { display: block; margin: 8px 0; }
+.form label.f > span { display: block; font-size: 13px; color: var(--dim); }
+.form input[type=text] { width: 100%; }
+.spin { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -2px; margin-right: 6px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="logo">&#9670;</span>玩家视角审查</div>
+    <div class="lbl">在看哪个游戏</div>
+    <select id="selProject"></select>
+    <div id="nav"></div>
+    <div class="grow"></div>
+    <div id="jobbox"></div>
+    <div id="usage"></div>
+    <button class="nav" id="btnHelp"><span class="ic">?</span>问 AI 怎么用</button>
+    <button class="nav" data-view="settings" id="navSettings"><span class="ic">&#9881;</span>设置</button>
+    <button class="nav" id="btnQuit" title="关掉页面的服务"><span class="ic">&#9211;</span>退出</button>
+  </aside>
+  <div class="main" id="main"><div class="empty">正在打开……</div></div>
+  <div class="drag" id="drag" title="拖动改宽度"></div>
+  <aside class="chat" id="chat"></aside>
+</div>
+<div class="toast" id="toast"></div>
+<div id="modal"></div>
+<script>
+'use strict';
+const TOKEN = '__PRK_TOKEN__';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const S = { ov: null, rid: null, round: null, view: 'home', sel: null, filter: 'all', todo: false, file: null, fileData: null, lib: null, costs: null, decRows: null,
+  more: 'files', find: '', chat: [], asking: false, okCost: false, help: false, draft: '', fixes: null, fixSel: null, fixing: null,
+  run: { groups: null, split: false, map: true, parallel: 4, who: '', kind: '', model: '' },
+  // a check started from the page: its state (/api/jobs), the last「先试一下」, the confirm box
+  job: null, watching: null, pollT: null, plan: null, planning: false, modal: null,
+  // forms: the provider's key (settings), this computer, a new game
+  pform: null, pedit: null, pformLoading: false, medit: null, newForm: null, newEdit: {}, newErr: '', newFields: {} };
+// plain words for everything the files call by a technical name
+const SEV = { S: '严重', M: '一般', L: '小问题', D: '要你拿主意', W: '玩家想要的' };
+const NAV = [['home', '首页', '⌂'], ['feedback', '玩家说了什么', '❝'], ['problems', '要处理的问题', '☰'], ['fixes', '待修清单', '✎'], ['run', '开始一次检查', '▶'], ['costs', '花了多少钱', '¥'], ['more', '更多', '…']];
+const DECIDE = [['修', '要修'], ['放进待做', '以后再说'], ['是设计', '本来就这样'], ['不是问题', '不是问题'], ['误报', 'AI 看错了']];
+const decLabel = v => (DECIDE.find(d => d[0] === v) || [v, v])[1];
+const sure = c => /确定没有/.test(c) ? '确定没有这个选项' : /可能没有/.test(c) ? '可能没有' : /确定/.test(c) ? '确定有' : /可能/.test(c) ? '可能有，要进游戏看看' : /设计/.test(c) ? '按设计就是这样' : c;
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+async function api(path, body) {
+  const r = await fetch(path, { method: body ? 'POST' : 'GET', headers: Object.assign({ 'X-PRK-Token': TOKEN }, body ? { 'Content-Type': 'application/json' } : {}),
+    body: body ? JSON.stringify(body) : undefined });
+  try { return await r.json(); } catch (e) { return { ok: false, error: '没有回应（' + r.status + '）' }; }
+}
+function toast(t, ms) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), ms || 1800); }
+async function copy(t, msg) {
+  try { await navigator.clipboard.writeText(t); } catch (e) {
+    const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  toast(msg || '复制好了，去终端里粘贴');
+}
+const wan = n => n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, '') + ' 万' : String(n || 0);
+// paths under the home folder hold the account name: shown as %USERPROFILE% (what gets copied is the real path, so commands work)
+function show(t) { const h = S.ov && S.ov.home; return h && h.length > 3 ? String(t ?? '').split(new RegExp(h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')).join('%USERPROFILE%') : String(t ?? ''); }
+// costs: false = 不花钱; true = 要花钱 (按次付费, or not chosen yet); 'sub' = 用会员额度
+function cmdBox(c, costs) {
+  const tag = costs === 'sub' ? '<span class="tag t-sub">用会员额度</span>' : costs ? '<span class="tag t-money">要花钱</span>' : '<span class="tag t-free">不花钱</span>';
+  return '<div class="cmd"><code>' + esc(show(c)) + '</code>' + tag + '<button class="btn sm" data-copy="' + esc(c) + '">复制</button></div>';
+}
+// how a command that runs AI is paid, as cmdBox wants it
+const payTag = p => p === 'sub' ? 'sub' : true;
+const PAYTXT = {
+  sub: ['用会员额度', '用这台电脑上登录的账号，不另外花钱，但会用掉你的额度。'],
+  api: ['按次付费', '用钥匙（key），用多少花多少钱。']
+};
+const curProvider = () => (S.ov.providers || []).find(x => x.id === S.ov.model.provider) || {};
+
+/* ---------- a small Markdown renderer (the reports are Markdown) ---------- */
+function md(text, opts) {
+  opts = opts || {};
+  const il = s => {
+    let h = esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    if (opts.ids) h = h.replace(/(?<![-\w])([SMLDW]\d+)\b/g, m => opts.ids.has(m) ? '<a class="ref k' + m[0] + '" data-ref="' + m + '">' + m + '</a>' : m);
+    return h;
+  };
+  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  const isList = l => /^\s*([-*]|\d+[.、)])\s+/.test(l);
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const ln = lines[i];
+    if (/^\s*```/.test(ln)) {
+      const buf = []; i++;
+      while (i < lines.length && !/^\s*```/.test(lines[i])) { buf.push(lines[i]); i++; }
+      i++; out.push('<pre><code>' + esc(buf.join('\n')) + '</code></pre>'); continue;
+    }
+    if (/^\s*$/.test(ln)) { i++; continue; }
+    let m = ln.match(/^(#{1,6})\s+(.*)$/);
+    if (m) { const n = Math.min(m[1].length + (opts.shift || 0), 6); out.push('<h' + n + '>' + il(m[2]) + '</h' + n + '>'); i++; continue; }
+    if (/^\s*\|/.test(ln) && i + 1 < lines.length && /^\s*\|?[\s:|-]*-[\s:|-]*$/.test(lines[i + 1])) {
+      const cells = l => l.trim().replace(/^\|/, '').replace(/\|$/, '').split(/(?<!\\)\|/).map(c => c.trim().replace(/\\\|/g, '|'));
+      const head = cells(ln); i += 2; const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+      out.push('<div class="tw"><table><thead><tr>' + head.map(c => '<th>' + il(c) + '</th>').join('') + '</tr></thead><tbody>' +
+        rows.map(r => '<tr>' + r.map(c => '<td>' + il(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>');
+      continue;
+    }
+    if (isList(ln)) {
+      let html = ''; const stack = [];
+      while (i < lines.length && (isList(lines[i]) || (/^\s{2,}\S/.test(lines[i]) && stack.length))) {
+        const mm = lines[i].match(/^(\s*)([-*]|\d+[.、)])\s+(.*)$/);
+        if (!mm) { html += '<br>' + il(lines[i].trim()); i++; continue; }
+        const ind = mm[1].length, tag = /\d/.test(mm[2]) ? 'ol' : 'ul';
+        while (stack.length && stack[stack.length - 1].ind > ind) html += '</li></' + stack.pop().tag + '>';
+        if (!stack.length || stack[stack.length - 1].ind < ind) { html += '<' + tag + '><li>'; stack.push({ ind, tag }); } else html += '</li><li>';
+        html += il(mm[3]); i++;
+      }
+      while (stack.length) html += '</li></' + stack.pop().tag + '>';
+      out.push(html); continue;
+    }
+    if (/^\s*>/.test(ln)) {
+      const buf = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) { buf.push(lines[i].replace(/^\s*>\s?/, '')); i++; }
+      out.push('<blockquote>' + buf.map(il).join('<br>') + '</blockquote>'); continue;
+    }
+    if (/^\s*(-{3,}|\*{3,})\s*$/.test(ln)) { out.push('<hr>'); i++; continue; }
+    const buf = [];
+    while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^#{1,6}\s/.test(lines[i]) && !/^\s*```/.test(lines[i]) && !/^\s*\|/.test(lines[i]) && !isList(lines[i])) { buf.push(lines[i]); i++; }
+    if (buf.length) out.push('<p>' + buf.map(il).join('<br>') + '</p>'); else { out.push('<p>' + il(ln) + '</p>'); i++; }
+  }
+  return '<div class="md">' + out.join('\n') + '</div>';
+}
+const plain = h => h.replace(/<\/?(div|p)[^>]*>/g, '');
+
+/* ---------- loading ---------- */
+async function loadAll(keep) {
+  const previous = S.ov && S.ov.project && S.ov.project.file;
+  S.ov = await api('/api/overview');
+  if (!S.ov || S.ov.error) { $('#main').innerHTML = '<div class="empty">读不到数据：' + esc(S.ov && S.ov.error) + '</div>'; return; }
+  if (previous && previous !== S.ov.project?.file) { keep = false; S.run.groups = null; }
+  const rs = S.ov.rounds || [];
+  if (!keep || !rs.some(r => r.id === S.rid)) {
+    const first = rs.find(r => r.hasReport && !r.sample) || rs.find(r => r.hasReport) || rs[0];
+    S.rid = first ? first.id : null;
+  }
+  if (S.run.groups === null && S.ov.project) S.run.groups = new Set(S.ov.project.defaultGroups);
+  const ended = seeJob(S.ov.job);
+  await loadRound(keep);
+  if (ended) setTimeout(jobEnded, 0);
+}
+async function loadRound(keep) {
+  S.round = S.rid ? await api('/api/round?id=' + encodeURIComponent(S.rid)) : null;
+  if (S.round && S.round.error) S.round = null;
+  if (!keep) { S.sel = null; S.file = null; S.fileData = null; }
+  S.decRows = null; S.fixes = null;     // the fix list is read again too: another AI window may have ticked something
+  draw();
+}
+const ids = () => new Set((S.round ? S.round.entries : []).map(e => e.id));
+const cur = () => (S.ov.rounds || []).find(r => r.id === S.rid);
+const roundName = r => !r ? '' : r.sample ? '示范（手写的）' : r.name.replace(/^(\d{4})(\d{2})(\d{2})(?:_(\d{2})(\d{2})(\d{2}))?(.*)$/, (m, y, mo, d, h, mi, s, rest) => mo + '月' + d + '日' + (h ? ' ' + h + ':' + mi : '') + (rest ? ' ' + rest.replace(/^_/, '') : ''));
+
+/* ---------- frame ---------- */
+function draw() {
+  const ps = S.ov.projects || [], p = S.ov.project;
+  $('#selProject').innerHTML = (p && S.view !== 'newgame' ? '' : '<option value="">' + (S.view === 'newgame' ? '（正在新加一个）' : '（先选一个）') + '</option>') +
+    ps.map(x => '<option value="' + esc(x.path) + '"' + (p && S.view !== 'newgame' && x.path.toLowerCase() === p.file.toLowerCase() ? ' selected' : '') + '>' + esc(x.title.replace(/\s*\[.*\]$/, '')) + '</option>').join('') +
+    '<option value="__new__">＋ 新加一个游戏</option>';
+  const r = S.round;
+  const todo = r ? r.entries.filter(e => !e.decision).length : 0;
+  const ft = S.ov.fixTodo ? (r && r.sample ? S.ov.fixTodo.sample : S.ov.fixTodo.real) : 0;
+  const n = { problems: todo || '', fixes: ft || '' };
+  $('#nav').innerHTML = NAV.map(([id, name, ic]) => '<button class="nav' + (S.view === id ? ' on' : '') + '" data-view="' + id + '"><span class="ic">' + ic + '</span>' + name +
+    (n[id] ? '<span class="n">' + n[id] + '</span>' : '') + '</button>').join('');
+  $('#navSettings').className = 'nav' + (S.view === 'settings' ? ' on' : '');
+  const f = { home: vHome, feedback: vFeedback, problems: vProblems, fixes: vFixes, run: vRun, costs: vCosts, more: vMore, settings: vSettings, newgame: vNewGame }[S.view] || vHome;
+  $('#main').innerHTML = '<div class="wrap">' + f() + '</div>';
+  drawUsage();
+  drawJob();
+  drawHelp();
+  if (S.view === 'settings' && S.ov.pay !== 'sub' && (!S.pform || S.pform.name !== S.ov.model.provider) && !S.pformLoading) {
+    S.pformLoading = true;
+    api('/api/provider/form?name=' + encodeURIComponent(S.ov.model.provider)).then(d => {
+      S.pformLoading = false;
+      if (d && d.ok) { S.pform = d; S.pedit = formEdit(d); } else S.pform = { name: S.ov.model.provider, error: (d && d.error) || '读不了' };
+      if (S.view === 'settings') draw();
+    });
+  }
+  if (S.view === 'newgame' && !S.newForm) api('/api/newproject').then(d => { S.newForm = d && d.ok ? d : { questions: [], folder: '' }; if (S.view === 'newgame') draw(); });
+  if (S.view === 'fixes' && !S.fixes && S.ov.project) api('/api/fixes?round=' + encodeURIComponent(S.rid || '')).then(d => { S.fixes = d || { ok: false }; if (S.view === 'fixes') draw(); });
+  if (S.view === 'costs' && !S.costs) api('/api/costs').then(d => { S.costs = d || { rows: [] }; if (S.view === 'costs') draw(); });
+  if (S.view === 'more' && S.more === 'decisions' && S.decRows === null) api('/api/decisions?round=' + encodeURIComponent(S.rid || '')).then(d => { S.decRows = d && d.rows ? d : { rows: [] }; draw(); });
+  if (S.view === 'more' && /players|methods|templates/.test(S.more) && !S.lib) api('/api/library').then(d => { S.lib = d; draw(); });
+}
+function roundPicker() {
+  const rs = (S.ov.rounds || []).filter(r => r.hasReport);
+  if (rs.length < 2) return '';
+  return '<div class="chips"><span class="sub" style="margin:0">看哪一次检查：</span><select id="selRound">' +
+    rs.map(r => '<option value="' + esc(r.id) + '"' + (r.id === S.rid ? ' selected' : '') + '>' + esc(roundName(r)) + '</option>').join('') + '</select></div>';
+}
+const sampleNote = () => S.round && S.round.sample ? '<div class="note">这是示范数据，是手写的，不是 AI 真检查出来的。在这里点的「要修」不会记进真的记录。</div>' : '';
+function needProject() {
+  return '<h1>先选一个游戏</h1><p class="sub">在左上角选。想先看看样子，选「茶摊（例子）」。</p>' +
+    '<div class="card"><h2>要检查自己的游戏？</h2><p>填几件事：游戏放在哪、报告写到哪。别的以后再补。</p><button class="btn pri" data-view="newgame">新加一个游戏</button></div>';
+}
+
+/* ---------- 首页 ---------- */
+function vHome() {
+  const p = S.ov.project;
+  if (!p) return needProject();
+  const steps = S.ov.next || [], r = S.round, row = cur();
+  let h = '<h1>' + esc(p.name) + '</h1><p class="sub">让 AI 假装成不同的玩家去玩这个游戏，告诉你他们会碰到什么问题、想要什么。</p>';
+  if (steps.length) {
+    const s = steps[0];
+    h += '<div class="card next"><div class="sub" style="margin:0 0 4px">现在做这一步</div><div class="what">' + esc(plainStep(s.title)) + '</div>' +
+      (s.detail ? '<p style="margin:4px 0 8px">' + esc(plainStep(s.detail)) + '</p>' : '') + stepAction(s) + '</div>';
+    if (steps.length > 1) h += '<details class="card"><summary>之后还有 ' + (steps.length - 1) + ' 件事</summary>' + steps.slice(1).map(x =>
+      '<div style="margin-top:12px"><b>' + esc(plainStep(x.title)) + '</b><p style="margin:2px 0">' + esc(plainStep(x.detail || '')) + '</p>' + stepAction(x) + '</div>').join('') + '</details>';
+  }
+  h += '<div class="card"><h2>上一次检查' + (row ? '：' + esc(roundName(row)) : '') + '</h2>';
+  if (!r || !r.reports.length) h += '<p class="sub" style="margin:0">还没有检查过。</p>';
+  else {
+    const c = r.counts, tot = r.entries.length, dec = r.entries.filter(e => e.decision).length;
+    h += sampleNote() + '<div class="nums">' + [['S', '严重的问题'], ['D', '要你拿主意'], ['W', '玩家想要的']].map(([k, t]) =>
+      '<div class="num k' + k + '" data-filter="' + k + '"><b>' + c[k] + '</b><span>' + t + '</span></div>').join('') + '</div>' +
+      '<p style="margin:0">另外还有一般的问题 ' + c.M + ' 条、小问题 ' + c.L + ' 条。</p>' +
+      '<div class="prog"><i style="width:' + (tot ? Math.round(dec * 100 / tot) : 0) + '%"></i></div><p class="sub" style="margin:0 0 10px">' + tot + ' 条里你处理了 ' + dec + ' 条</p>' +
+      '<button class="btn pri" data-view="feedback">看玩家说了什么</button> <button class="btn" data-view="problems">去处理问题</button>';
+  }
+  return h + '</div>';
+}
+// the next steps are written by prk.py; a few words there are still technical: say them plainly
+function plainStep(t) {
+  return String(t).replace(/演习/g, '试一下').replace(/订阅模式/g, '用会员额度').replace(/API 模式/g, '按次付费').replace(/反馈/g, '玩家的话')
+    .replace(/审查员/g, 'AI').replace(/审查/g, '检查').replace(/轮/g, '次').replace(/条目/g, '问题').replace(/项目设置/g, '游戏的设置');
+}
+// every step is a button on the page (the step's cmd is for the terminal and for an AI: see「更多 → 命令行」)
+function stepAction(s) {
+  const round = s.round ? ' data-round="' + esc(s.round) + '"' : '';
+  switch (s.view) {
+    case 'guide': return '<button class="btn" data-ask="' + esc(s.title + '，我该怎么做？') + '">问 AI 怎么做</button>';
+    case 'settings': return '<button class="btn pri" data-view="settings">去设置</button>';
+    case 'entries': case 'problems': return '<button class="btn pri" data-view="problems"' + round + '>去处理问题</button>';
+    case 'fixes': return '<button class="btn pri" data-view="fixes">去待修清单</button>';
+    case 'run': return '<button class="btn pri" data-view="run">' + (s.costs ? '去开始检查' : '去试一下（不花钱）') + '</button>';
+    case 'files': return '<button class="btn" data-view="more" data-moretab="files"' + round + '>去看这次的文件</button>';
+    case 'cite': return '<button class="btn" id="btnCite"' + round + '>核对出处（不花钱，几秒钟）</button>';
+    case 'expand': return '<button class="btn pri" data-expand="' + esc(s.items || '') + '"' + round + ' data-report="' + esc(s.report || '') + '">让 AI 写建议</button> ' +
+      (s.pay === 'sub' ? '<span class="tag t-sub">用会员额度</span>' : '<span class="tag t-money">要花钱</span>');
+    case 'newgame': return '<button class="btn pri" data-view="newgame">新加一个游戏</button>';
+    case 'cli': return '<button class="btn" data-view="more" data-moretab="cli">看怎么做</button>';
+  }
+  return '';
+}
+
+/* ---------- 玩家说了什么 ---------- */
+function sayTag(kind) {
+  const k = kind || '';
+  const cls = /卡|丢|坏/.test(k) ? 't-bad' : /不懂|不公平|奇怪|烦/.test(k) ? 't-warn' : /想要/.test(k) ? 't-want' : /做对/.test(k) ? 't-good' : 't-gray';
+  return k ? '<span class="tag ' + cls + '">' + esc(k.replace('做对了的', '做得好的')) + '</span>' : '';
+}
+function vFeedback() {
+  if (!S.ov.project) return needProject();
+  const r = S.round;
+  let h = '<h1>玩家说了什么</h1><p class="sub">每一类玩家玩完会怎么说。话后面的小标签（比如 M1）点一下，就能看到是哪个问题、在游戏的哪一行。</p>' + roundPicker() + sampleNote();
+  if (!r || !r.reports.length) return h + '<div class="card empty">还没有检查过。去「开始一次检查」。</div>';
+  const I = ids();
+  if (r.feedback.length) {
+    h += '<div class="players">' + r.feedback.map(p => '<div class="card"><h2>' + plain(md(p.player, { ids: I })) + '</h2>' +
+      p.says.map(s => '<div class="say">' + sayTag(s.kind) + '<div>' + plain(md(s.text, { ids: I })) +
+        (s.refs || []).filter(x => I.has(x) && !new RegExp('\\b' + x + '\\b').test(s.text)).map(x => ' <a class="ref k' + x[0] + '" data-ref="' + x + '">' + x + '</a>').join('') +
+        '</div></div>').join('') + '</div>').join('') + '</div>';
+    const rest = r.feedbackMarkdown.split('\n').filter(l => !/^\s*\|/.test(l) && !/^〔.*〕$/.test(l.trim())).join('\n').trim();
+    if (rest && r.feedback.every(p => p.says.every(s => !s.kind))) h += '<div class="card" style="margin-top:16px">' + md(rest, { ids: I, shift: 1 }) + '</div>';
+  } else if (r.feedbackMarkdown) h += '<div class="card">' + md(r.feedbackMarkdown, { ids: I, shift: 1 }) + '</div>';
+  else h += '<div class="card empty">这次的报告里没有这一段（旧版的报告没有）。去「要处理的问题」看。</div>';
+  if (r.conclusion) h += '<details class="card"><summary>AI 的总结</summary>' + md(r.conclusion, { ids: I }) + '</details>';
+  return h;
+}
+
+/* ---------- 要处理的问题 ---------- */
+function vProblems() {
+  if (!S.ov.project) return needProject();
+  const r = S.round;
+  let h = '<h1>要处理的问题</h1><p class="sub">点一条看详细，然后告诉它你打算怎么办。下次检查时，AI 会先看你说要修的修好了没有。</p>' + roundPicker() + sampleNote();
+  if (!r || !r.entries.length) return h + '<div class="card empty">' + (r && r.reports.length ? '这次的报告里没认出问题（可能是旧版的报告）。可以在「更多 → 这次的文件」里直接看报告。' : '还没有检查过。') + '</div>';
+  const list = r.entries.filter(e => (S.filter === 'all' || e.kind === S.filter) && (!S.todo || !e.decision));
+  h += '<div class="chips"><span class="chip' + (S.filter === 'all' ? ' on' : '') + '" data-filter="all">全部 ' + r.entries.length + '</span>' +
+    'SDWML'.split('').filter(k => r.counts[k]).map(k => '<span class="chip' + (S.filter === k ? ' on' : '') + '" data-filter="' + k + '">' + SEV[k] + ' ' + r.counts[k] + '</span>').join('') +
+    '<label style="margin-left:6px"><input type="checkbox" id="chkTodo"' + (S.todo ? ' checked' : '') + '> 只看还没处理的</label></div>';
+  h += '<div class="split"><div class="list">' + (list.length ? list.map(e => '<div class="item' + (S.sel === e.report + '|' + e.id ? ' on' : '') + '" data-entry="' + esc(e.report + '|' + e.id) + '">' +
+    '<span class="sev k' + e.kind + '">' + SEV[e.kind] + '</span><span class="t" title="' + esc(e.title) + '">' + esc(e.title) + '</span>' +
+    (e.decision ? '<span class="tag t-dec">' + esc(decLabel(e.decision.decision)) + '</span>' : '') + '</div>').join('') : '<div class="empty">没有。</div>') + '</div>';
+  const e = r.entries.find(x => x.report + '|' + x.id === S.sel);
+  h += '<div class="card" style="position:sticky;top:0">';
+  if (!e) h += '<div class="empty">在左边点一条。</div>';
+  else {
+    h += '<span class="sev k' + e.kind + '">' + SEV[e.kind] + '</span> <span class="sub">编号 ' + e.id + (e.confidence ? '　' + esc(sure(e.confidence)) : '') + '</span>' +
+      '<h2 style="margin-top:8px">' + esc(e.title) + '</h2>' +
+      '<div class="decide"><span>你打算：</span>' + DECIDE.map(([v, t]) => '<button class="btn sm' + (e.decision && e.decision.decision === v ? ' pri' : '') + '" data-decide="' + esc(v) + '">' + t + '</button>').join('') +
+      '<input type="text" id="why" placeholder="想说一句为什么（可以不写）" value="' + esc(e.decision ? e.decision.why : '') + '"></div>' +
+      (e.decision ? '<p class="sub" style="margin:0 0 8px">' + esc(e.decision.date) + ' 你选了「' + esc(decLabel(e.decision.decision)) + '」。改主意就再点一个。</p>' : '') +
+      md(e.body || '（这一条没有写详细）', { ids: ids() });
+  }
+  return h + '</div></div>';
+}
+
+/* ---------- 待修清单 ---------- */
+// one Markdown file hands the problems over to an AI: the person sees titles, the AI reads the details in the file
+function vFixes() {
+  if (!S.ov.project) return needProject();
+  const d = S.fixes;
+  let h = '<h1>待修清单</h1><p class="sub">你说「要修」的问题都在这里。修好一条，它就挪到下面。</p>' + sampleNote();
+  if (!d) return h + '<div class="card empty">正在读……</div>';
+  if (!d.ok) return h + '<div class="card empty">' + esc(d.error || '读不了待修清单。') + '</div>';
+  const todo = d.items.filter(x => !x.done), done = d.items.filter(x => x.done);
+  h += '<div class="card"><p style="margin:0 0 4px"><b>两种修法</b></p>' +
+    '<p style="margin:0">「复制给 AI」：复制一句很短的话，发给你自己正在用的 AI。细节它自己去清单文件里读，你不用贴一大段。</p>' +
+    '<p style="margin:0">「让 AI 直接修」：这个工具派一个 AI 去改游戏的文件。会用掉额度或花钱；改之前先备份，改坏了能撤回。</p>' +
+    '<p class="sub" style="margin:6px 0 0">清单文件：' + esc(show(d.file)) + '（别的 AI 改了它，点「刷新」就能看到）</p>' +
+    '<div class="chips" style="margin:10px 0 0"><button class="btn" id="btnFixRefresh">刷新</button>' +
+    (todo.length > 1 ? '<button class="btn pri" data-copyai="' + esc(d.copyAll) + '">全部复制给 AI（' + todo.length + ' 条）</button>' : '') + '</div></div>';
+  if (d.runProblem && todo.length) h += '<div class="note">「让 AI 直接修」现在用不了：' + esc(d.runProblem).replace(/\n/g, '<br>') + '</div>';
+  h += '<h2>还没修的（' + todo.length + '）</h2>' + (todo.length ? todo.map(x => fixCard(x, d)).join('') :
+    '<div class="card empty">没有了。在「要处理的问题」里点「要修」，那一条就会放进来。</div>');
+  h += '<h2 style="margin-top:22px">修好了，等下次检查确认（' + done.length + '）</h2>' + (done.length ? done.map(x => fixCard(x, d)).join('') :
+    '<div class="card empty">还没有。</div>') + '<p class="sub">下次检查时，AI 会先看这些是不是真的修好了。</p>';
+  return h;
+}
+function fixCard(x, d) {
+  const open = S.fixSel === x.id, k = (x.entry || 'L')[0], busy = S.fixing === x.id;
+  let h = '<div class="fix"><div class="item' + (open ? ' on' : '') + '" data-fixsel="' + esc(x.id) + '"><span class="sev k' + k + '">' + esc(x.severity || SEV[k] || '') + '</span>' +
+    '<b>' + esc(x.id) + '</b><span class="t" title="' + esc(x.title) + '">' + esc(x.title) + '</span>' +
+    (!x.done && x.canUndo ? '<span class="tag t-warn">AI 改过一次</span>' : '') + '<span class="sub" style="margin:0;font-size:13px">' + (open ? '收起' : '看全文') + '</span></div>';
+  if (x.done) h += '<div class="fx">' + (x.hasFill ? md(x.filledText) : '<p class="sub" style="margin:6px 0">「修完填这里」是空的：没写改了什么。</p>') + '</div>';
+  if (open) h += '<div class="fx">' + (x.why && x.why !== '没写' ? '<p style="margin:6px 0">你说过：' + esc(x.why) + '</p>' : '') + md(x.body || '（没有写详细）') + '</div>';
+  h += '<div class="fixbtns">';
+  if (!x.done) h += '<button class="btn sm" data-copyai="' + esc(x.copy) + '">复制给 AI</button>' +
+    '<button class="btn sm' + (busy ? '' : ' pri') + '" data-fix="run" data-id="' + esc(x.id) + '"' +
+      (S.fixing || d.runProblem || !x.confirmation?.report ? ' disabled' : '') + (!d.runProblem && !x.confirmation?.report ? ' title="找不到原报告"' : '') + '>' +
+      (busy ? '<span class="spin"></span>AI 在修，几分钟……' : '让 AI 直接修') + '</button>' +
+    '<button class="btn sm" data-fix="done" data-id="' + esc(x.id) + '"' + (busy ? ' disabled' : '') + '>修好了</button>';
+  if (x.canUndo) h += '<button class="btn sm" data-fix="undo" data-id="' + esc(x.id) + '"' + (busy ? ' disabled' : '') + '>撤回</button>';
+  if (x.done) h += '<button class="btn sm" data-fix="reopen" data-id="' + esc(x.id) + '">放回去</button>';
+  return h + '</div></div>';
+}
+async function fixAction(act, id, fixes = S.fixes) {
+  if (act === 'run') {
+    if (S.fixing) return toast('AI 还在修 ' + S.fixing + '，等它修完');
+    const round = S.rid, item = fixes?.items?.find(x => x.id === id && !x.done), binding = item?.confirmation;
+    if (!binding?.report) return toast('找不到这条待修记录的轮次或原报告', 4000);
+    const pay = binding.pay;
+    if (!pay) { toast('先选用什么付'); S.view = 'settings'; return draw(); }
+    const how = (pay === 'sub' ? '用会员额度' : '按次付费，要花钱') + '，' + (fixes.providerName || binding.provider) + ' 的「' + (binding.model || '默认型号') + '」';
+    if (!confirm('让 AI 直接修 ' + id + ' 「' + binding.title + '」？\n\n项目设置：' + show(binding.project) +
+      '\n轮次：' + binding.round + '\n原报告：' + show(binding.report) + '\n报告条目：' + binding.entry +
+      '\n怎么付：' + how + '\n\nAI 只看清单和游戏的规矩，效果可能和你在自己的对话里直接修不同。改之前先备份，改坏了可以撤回。')) return;
+    S.fixing = id; draw();
+    const r = await api('/api/fix', { action: 'run', round, id, confirmation: binding, confirmed: true });
+    S.fixing = null; S.costs = null;
+    if (r?.changed?.length) {
+      await loadAll(true);
+      const fresh = await api('/api/fixes?round=' + encodeURIComponent(S.rid || ''));
+      if (fresh?.ok && !fresh.runProblem && fresh.items.some(x => x.id === id && !x.done && x.confirmation?.report)) {
+        toast('信息已更新，请重新确认。', 4000);
+        return fixAction(act, id, fresh);
+      }
+      return toast(r.error || '这条已经不能直接修。', 4000);
+    }
+    if (r && r.ok) toast(id + ' 修好了，挪到下面了', 3000);
+    else alert(show((r && r.error) || '没修成。') + (r && r.tail ? '\n\n日志的最后几行：\n' + show(r.tail) : ''));
+    if (r?.missing?.length) alert('没找到或不许碰的出处文件：\n' + r.missing.map(show).join('\n'));
+    return loadAll(true);
+  }
+  const binding = fixes?.items?.find(x => x.id === id)?.actionBinding;
+  if (!binding) { toast('请刷新待修清单后再操作。'); return loadAll(true); }
+  if (act === 'undo' && !confirm('撤回 ' + id + '「' + binding.title + '」？\n\n项目设置：' + show(binding.project) +
+    '\n轮次：' + binding.round + '\n会照备份改回文件，并把这条放回「还没修的」。')) return;
+  const r = await api('/api/fix', { action: act, round: S.rid, id, confirmation: binding });
+  if (r?.changed?.length) {
+    await loadAll(true);
+    return toast('待修清单已刷新，请核对后重新操作。', 4000);
+  }
+  if (!r || !r.ok) { alert(show((r && r.error) || '没做成。')); return loadAll(true); }
+  if (act === 'undo') {
+    toast('改回去了 ' + r.restored.length + ' 个文件，' + id + ' 放回了还没修的', 3000);
+    if (r.noBackup && r.noBackup.length) alert('这些文件没有备份，没法撤回（AI 说它改过）：\n' + r.noBackup.map(show).join('\n'));
+  } else toast(act === 'done' ? id + ' 标成修好了' : id + ' 放回了还没修的');
+  return loadAll(true);
+}
+// the small box above「问 AI 怎么用」: this month's money (and the budget), and what the plan's quota was used for
+function drawUsage() {
+  const u = S.ov && S.ov.usage, el = $('#usage');
+  if (!el) return;
+  if (!u) { el.innerHTML = ''; return; }
+  const b = u.budget, pct = b ? u.usd * 100 / b : 0, other = Object.entries(u.other || {});
+  el.innerHTML = '<button class="usage" data-view="costs" title="去「花了多少钱」">' +
+    '<div>这个月：<b>$' + u.usd.toFixed(2) + '</b>' + (b ? ' / $' + b.toFixed(2) : '') + '</div>' +
+    (b ? '<div class="prog' + (pct > 100 ? ' over' : pct > 80 ? ' warn' : '') + '"><i style="width:' + Math.min(100, pct).toFixed(0) + '%"></i></div>' : '') +
+    (other.length ? '<div class="sm">另有 ' + esc(other.map(([k, v]) => v.toFixed(2) + ' ' + k).join('、')) + '</div>' : '') +
+    (u.subTasks || S.ov.pay === 'sub' ? '<div class="sm">会员额度：本月用了约 ' + wan(u.subTokens) + ' token（还剩多少看不到）</div>' : '') + '</button>';
+}
+
+/* ---------- 开始一次检查 ---------- */
+function vRun() {
+  const p = S.ov.project;
+  if (!p) return needProject();
+  const R = S.run, busy = S.job && S.job.alive, pay = S.ov.pay;
+  const ai = curProvider(), aiName = '「' + esc(ai.name || S.ov.model.provider) + '」';
+  const who = aiName + '的「' + esc(R.model || S.ov.model.current || '默认型号') + '」';
+  const howPay = !pay ? '还没选用什么付：点「开始检查」时会先问你。'
+    : S.ov.payProblem ? '<span class="tag t-bad">' + (ai.signinProblem ? esc(ai.signinProblem) : aiName + '只能按次付费，用不了会员额度') + '</span> 去「设置」换一家，或者把「怎么付」改成按次付费。'
+    : pay === 'sub' ? '用会员额度：用这台电脑上 ' + esc(ai.signinWith || 'Claude Code') + ' 登录的账号，不另外花钱，但会用掉你的额度。'
+    : '按次付费：用' + aiName + '的钥匙（key），用多少花多少钱。';
+  let h = '<h1>开始一次检查</h1><p class="sub">选好让哪些玩家去玩，先试一下（不花钱，只看会派几个 AI），再开始。开始以后可以关掉窗口，检查会在后台接着跑。</p>';
+  h += '<div id="jobCard">' + jobCard() + '</div>';
+  h += '<div class="card"><h2>第一步：选让谁去玩</h2><p class="sub" style="margin:0 0 8px">每一组是几类玩家。勾得越多，检查得越全，也越花钱。</p>' +
+    p.groups.map(x => '<label style="display:block;padding:4px 0"><input type="checkbox" data-group="' + esc(x.id) + '"' + (R.groups.has(x.id) ? ' checked' : '') + '> <b>' + esc(x.name || x.id) + '</b>' +
+      (x.personas.length ? '<span class="sub" style="margin:0 0 0 8px;font-size:13px">' + esc(x.personas.map(s => s.replace(/^\d+\s*/, '').replace(/（.*?）/g, '')).join('、')) + '</span>' : '') + '</label>').join('') +
+    '<details><summary>更多选项</summary>' +
+    (p.splits.length ? '<label style="display:block"><input type="checkbox" id="runSplit"' + (R.split ? ' checked' : '') + '> 每个' + esc(p.splitUnit) + '分开看（更仔细，更花钱）</label>' : '') +
+    '<label style="display:block"><input type="checkbox" id="runMap"' + (R.map ? ' checked' : '') + '> 先让 AI 把游戏整理成几张表（派两组以上时建议勾上）</label>' +
+    '<label style="display:block;margin-top:4px">同时最多跑 <input type="number" id="runPar" min="1" max="12" value="' + R.parallel + '" style="width:64px"> 个</label>' +
+    '<label style="display:block;margin-top:6px">这一次换个 AI 型号 ' + modelInput('runModel', R.model) + '</label></details></div>';
+  h += '<div class="card"><h2>第二步：先试一下，再开始</h2><p style="margin:0 0 10px">现在用的是' + who + '。' + howPay + '</p>' +
+    '<div class="chips" style="margin:0"><button class="btn" data-run="plan"' + (S.planning ? ' disabled' : '') + '>先试一下（不花钱）</button>' +
+    '<button class="btn pri" data-run="run"' + (busy || S.planning ? ' disabled' : '') + '>开始检查</button>' +
+    (busy ? '<span class="sub" style="margin:0">已经有一次在跑，等它跑完</span>' : '') + '</div>' + planBox('run') + '</div>';
+  h += '<div class="card"><h2>只派一类玩家（最便宜）</h2><p class="sub" style="margin:0 0 8px">只派一个 AI，不整理、不汇总。写玩家类型的编号，用 + 隔开；编号在「更多 → 玩家类型」里查。</p>' +
+    '<div class="chips" style="margin:0"><input type="text" id="runWho" placeholder="例：15 + 18" value="' + esc(R.who) + '" style="width:140px">' +
+    '<select id="runKind" title="检查方法">' + (S.ov.reviewKinds || []).map(k => '<option value="' + esc(k.id) + '"' + ((R.kind || 'persona') === k.id ? ' selected' : '') + '>' + esc(k.name) + '</option>').join('') + '</select>' +
+    '<button class="btn" data-run="qplan"' + (S.planning ? ' disabled' : '') + '>先试一下</button>' +
+    '<button class="btn pri" data-run="quick"' + (busy || S.planning ? ' disabled' : '') + '>开始</button></div>' + planBox('quick') + '</div>';
+  h += '<details class="card"><summary>想在 Claude Code 的对话里一边聊一边检查？</summary><p style="margin:6px 0 0">也行，也是用会员额度。要先在游戏的文件夹里装一次，再在 Claude Code 里说「/player-review」。' +
+    '一步一步怎么做，在「更多 → 命令行（给 AI 用）」里有一句 <code>prk ask</code>，或者直接问左下角的「问 AI 怎么用」。</p></details>';
+  return h;
+}
+// what the page sends for「先试一下」and「开始」: the choices above
+function planBody(kind, target) {
+  const R = S.run, p = S.ov.project;
+  const base = { mode: kind, project: p.file };
+  if (kind === 'quick') return { ...base, who: R.who, kind: R.kind || 'persona', model: R.model };
+  if (kind === 'expand') return { ...base, ...target };
+  return { ...base, groups: [...R.groups].filter(x => p.groups.some(y => y.id === x)), split: !!(R.split && p.splits.length), map: R.map, parallel: R.parallel, model: R.model };
+}
+function planBox(which) {
+  if (S.planning === which) return '<p class="sub" style="margin:10px 0 0"><span class="spin"></span>正在试……几秒钟，不花钱</p>';
+  const d = S.plan && S.plan.which === which ? S.plan.data : null;
+  if (!d) return '';
+  if (!d.ok) return '<div class="note" style="margin:10px 0 0">' + esc(d.error || '试不了。') + (d.tail ? '<pre>' + esc(show(d.tail)) + '</pre>' : '') + '</div>';
+  const pay = S.ov.pay, est = d.estimate.text;
+  return '<div style="margin-top:12px"><p style="margin:0"><b>会派 ' + d.count + ' 个 AI：</b>' + d.tasks.map(t => esc(t.label)).join('、') + '</p>' +
+    '<p style="margin:4px 0 0"><b>大概花多少：</b>' + (pay ? esc(est[pay]) : '按次付费：' + esc(est.api) + '　用会员额度：' + esc(est.sub)) + '</p>' +
+    (pay && d.cannot[pay] ? '<p class="note" style="margin:6px 0 0">' + esc(d.cannot[pay]).replace(/\n/g, '<br>') + '</p>' : '') +
+    '<p class="sub" style="margin:4px 0 0">试一下什么都没真的跑，也没花钱。</p></div>';
+}
+async function doPlan(which) {
+  if (which === 'quick' && !S.run.who.trim()) return toast('先写玩家类型的编号，例：15 + 18');
+  S.planning = which; draw();
+  const r = await api('/api/run', Object.assign({ what: 'plan' }, planBody(which)));
+  S.planning = false; S.plan = { which, data: r || { ok: false, error: '没有回应。' } }; draw();
+}
+
+/* ---------- the confirm box (开始检查 / 只派一类玩家 / 让 AI 写建议) ---------- */
+async function openStart(kind, target, retry = true) {
+  if (!S.ov.project) return toast('先选一个游戏');
+  if (S.job && S.job.alive) return toast('已经有一次检查在跑，等它跑完');
+  if (kind === 'quick' && !S.run.who.trim()) return toast('先写玩家类型的编号，例：15 + 18');
+  const m = S.modal = { kind, target, request: planBody(kind, target), loading: true, pay: '', plan: null, error: '', starting: false };
+  drawModal();
+  const r = await api('/api/run', { ...m.request, what: 'plan' });
+  if (S.modal !== m) return;
+  if (retry && r?.changed?.length) return refreshStart(m);
+  m.loading = false; m.plan = r || { ok: false, error: '没有回应。' }; m.pay = m.plan.pay || '';
+  if (kind !== 'expand') { S.plan = { which: kind, data: m.plan }; draw(); }
+  drawModal();
+}
+async function refreshStart(m) {
+  await loadAll(true);
+  if (S.modal !== m) return;
+  let target = m.target;
+  if (m.kind === 'expand' && target?.round) {
+    const step = S.ov.next?.find(s => s.view === 'expand');
+    if (!step) { S.modal = null; drawModal(); return toast('当前没有可写建议的合并报告。', 4000); }
+    target = { items: step.items, round: step.round, report: step.report };
+  }
+  toast('信息已更新，请重新确认。', 4000);
+  return openStart(m.kind, target, false);
+}
+function drawModal() {
+  const el = $('#modal'), m = S.modal;
+  if (!m) { el.innerHTML = ''; return; }
+  let h = '<div class="modal-bg"><div class="modal"><h2>' + { run: '开始检查？', quick: '只派一类玩家？', expand: '让 AI 写加内容的建议？' }[m.kind] + '</h2>';
+  if (m.loading) h += '<p><span class="spin"></span>正在算会派几个 AI……（不花钱）</p><div class="btns"><button class="btn" data-modal="cancel">取消</button></div>';
+  else if (!m.plan.ok) h += '<div class="note">' + esc(m.plan.error || '试不了。') + '</div>' + (m.plan.tail ? '<pre>' + esc(show(m.plan.tail)) + '</pre>' : '') +
+    '<div class="btns"><button class="btn" data-modal="cancel">关上</button></div>';
+  else {
+    const d = m.plan, pay = m.pay, cannot = pay ? d.cannot[pay] : '';
+    h += '<p><b>项目设置：</b>' + esc(show(d.confirmation.project)) + '</p>';
+    h += '<p><b>会派 ' + d.count + ' 个 AI</b>' + (m.kind === 'expand' ? '，照「' + esc(roundName({ name: d.confirmation.round })) + '」那次的总报告写。' : '去玩。') + '</p>' +
+      (m.kind === 'expand' ? '<p><b>报告：</b>' + esc(show(d.confirmation.report)) + '</p>' : '') +
+      (d.count > 1 ? '<details><summary>都是谁</summary><ul style="margin:4px 0">' + d.tasks.map(t => '<li>' + esc(t.label) + '</li>').join('') + '</ul></details>' : '');
+    if (d.pay) h += '<p><b>用什么付：</b>' + esc(d.payLine[pay].replace(/^用什么付：/, '')) + '</p>';
+    else h += '<p><b>用什么付？</b>还没选过。选一个，以后都用它（在「设置」里能改）。</p>' + ['sub', 'api'].map(v => '<label class="opt' + (pay === v ? ' on' : '') + '"><input type="radio" name="mpay" value="' + v + '"' +
+      (pay === v ? ' checked' : '') + (v === 'sub' && d.provider.signinProblem ? ' disabled' : '') + '> <b>' + PAYTXT[v][0] + '</b><small>' +
+      (v === 'sub' && d.provider.signinProblem ? esc(d.provider.signinProblem) : PAYTXT[v][1]) + '</small></label>').join('');
+    h += '<p><b>哪家的 AI：</b>' + esc(d.provider.name) + '，型号「' + esc(d.model || '默认') + '」</p>';
+    h += '<p><b>大概花多少：</b>' + (pay ? esc(d.estimate.text[pay]) : '先选用什么付。') + '</p>';
+    if (cannot) h += '<div class="note">' + esc(cannot).replace(/\n/g, '<br>') + ' <button class="btn sm" data-modal="cancel" data-view="settings">去设置</button></div>';
+    if (m.error) h += '<div class="note">' + esc(m.error).replace(/\n/g, '<br>') + '</div>';
+    h += '<p class="sub">开始以后可以关掉这个窗口，它会在后台接着跑；再双击「玩家视角审查.exe」打开就能看到进度。中途可以点「停下」：排着队的不再开始，但已经开跑的会跑完，照样花钱（或用额度）。</p>' +
+      '<div class="btns"><button class="btn" data-modal="cancel">取消</button><button class="btn pri" data-modal="go"' + (!pay || cannot || m.starting ? ' disabled' : '') + '>' +
+      (m.starting ? '<span class="spin"></span>' : '') + (m.kind === 'expand' ? '开始写' : '开始检查') + '</button></div>';
+  }
+  el.innerHTML = h + '</div></div>';
+}
+async function confirmStart() {
+  const m = S.modal;
+  if (!m || !m.plan || !m.plan.ok || m.starting || !m.pay) return;
+  m.starting = true; m.error = ''; drawModal();
+  const r = await api('/api/run', { ...m.request, what: m.kind, pay: m.pay, confirmation: m.plan.confirmation, confirmed: true });
+  if (r?.changed?.length) return refreshStart(m);
+  m.starting = false;
+  if (!r || !r.ok) { m.error = (r && r.error) || '没开始。'; return drawModal(); }
+  S.modal = null; drawModal();
+  toast(m.kind === 'expand' ? '开始写了' : '开始了。可以关掉窗口，它会在后台接着跑', 3500);
+  S.view = 'run'; S.costs = null;
+  seeJob(r.job);
+  await loadAll(true);
+}
+
+/* ---------- a check running in the background: the small box on the left, the card on「开始一次检查」 ---------- */
+const TASKST = { pending: ['排队', 't-gray'], running: ['在跑', 't-sub'], ok: ['做完了', 't-good'], failed: ['没成功', 't-bad'], skipped: ['没跑（没有报告可汇总）', 't-gray'], never: ['不会开始了', 't-gray'], stale: ['日志超时，按中断处理', 't-bad'] };
+const pct = j => j.total ? Math.round(j.done * 100 / j.total) : 0;
+const spentText = j => j.pay === 'sub' ? (j.tokens ? '用了约 ' + wan(j.tokens) + ' token 的会员额度' : '') : (j.usd ? '花了约 $' + j.usd.toFixed(2) : '');
+// returns true when the check this page was watching has just ended
+function seeJob(j) {
+  S.job = j || null;
+  if (S.job?.alive) schedulePoll(S.job.state === 'stopping' ? 6000 : 3000);
+  if (S.job && S.job.alive) { S.watching = S.job.id; return false; }
+  if (S.watching && (!S.job || S.job.id === S.watching)) { S.watching = null; return true; }
+  return false;
+}
+function schedulePoll(ms) { clearTimeout(S.pollT); S.pollT = setTimeout(pollJob, ms); }
+async function pollJob() {
+  const r = await api('/api/jobs');
+  if (!r || !r.ok) return schedulePoll(6000);
+  S.ov.ledgerNotice = r.ledgerNotice;
+  if (seeJob(r.job)) return jobEnded();
+  drawJob();
+}
+function jobEndText(j) {
+  if (j.state === 'unverified') return '检查状态待核对';
+  if (j.what === 'expand') return { done: '建议写完了', stopped: '写建议停了', error: j.problem || '提案失败，请看这一次的日志' }[j.state];
+  return { done: '检查全部成功', stopped: '检查停了', failed: '检查结束了，有失败', error: '检查没做完，出错了' }[j.state];
+}
+async function jobEnded() {
+  const j = S.job;
+  if (!j) return;
+  const spent = spentText(j);
+  toast(jobEndText(j) + (spent ? '，' + spent : '') + (j.ledgerPending ? '。账还没记上。' : ''), 6000);
+  S.costs = null;
+  await loadAll(true);
+  if (j.thisProject && (S.ov.rounds || []).some(r => r.id === j.round && r.hasReport)) { S.rid = j.round; await loadRound(false); }
+}
+function drawJob() {
+  const el = $('#jobbox'), j = S.job;
+  if (el) el.innerHTML = j && j.alive ? '<button class="jobbox" data-view="run" title="去看进度">' + (j.state === 'stopping' ? '正在停' : j.what === 'expand' ? '正在写建议' : '正在检查') + ' ' +
+    (j.total ? j.done + '/' + j.total : '……') + '<div class="prog"><i style="width:' + pct(j) + '%"></i></div></button>' : '';
+  const c = $('#jobCard');
+  if (c) c.innerHTML = jobCard();
+}
+function jobCard() {
+  const j = S.job;
+  const notice = S.ov.ledgerNotice ? '<div class="card note">' + esc(S.ov.ledgerNotice) + '。下次打开页面或开始新检查前会再试。</div>' : '';
+  if (!j) return notice;
+  const what = j.what === 'expand' ? '写建议' : '检查';
+  const head = j.alive ? (j.state === 'stopping' ? '正在停' : j.state === 'preparing' ? '正在准备（先自动查一遍文字）……' : '正在' + what + '：' + j.done + ' / ' + j.total + ' 做完了')
+    : jobEndText(j);
+  const title = j.state === 'unverified' ? jobEndText(j) : head;
+  const spent = spentText(j);
+  let h = '<div class="card next"><h2>' + (j.alive ? '<span class="spin"></span>' : '') + esc(title) + '</h2>' +
+    '<div class="prog' + (j.failed ? ' warn' : '') + '"><i style="width:' + pct(j) + '%"></i></div>' +
+    '<p class="sub" style="margin:0 0 8px">' + (j.thisProject ? '' : '游戏：' + esc(j.projectName) + '。') + esc(j.started) + ' 开始' + (j.ended ? '，' + esc(j.ended) + ' 结束' : '') + '。' +
+    (j.pay === 'sub' ? '用会员额度' : '按次付费') + '，' + esc(j.providerName) + ' 的「' + esc(j.model || '默认型号') + '」。' + (spent ? (j.alive ? '目前' : '') + spent + '。' : '') + '</p>';
+  if (j.problem && j.problem !== title) h += '<div class="note">' + esc(j.problem) + '</div>';
+  if (j.tasks.length) h += '<div>' + j.tasks.map(t => '<div class="t-row"><span class="tag ' + TASKST[t.state][1] + '">' + (t.state === 'running' ? '<span class="spin"></span>' : '') + TASKST[t.state][0] + '</span>' +
+    '<span style="flex:1">' + esc(t.label) + '</span>' + (t.usd != null && j.pay !== 'sub' ? '<span class="sub" style="margin:0">$' + t.usd.toFixed(2) + '</span>' : '') + '</div>').join('') + '</div>';
+  if (j.state === 'stopping') h += '<p class="note" style="margin:8px 0 0">排着队的不会再开始。' +
+    (j.running ? '已经开跑的 ' + j.running + ' 个会继续跑完并计费。' : '正在确认已开跑的任务。') + '</p>';
+  h += '<details' + (['error', 'failed', 'unverified'].includes(j.state) ? ' open' : '') + '><summary>运行记录的最后几行</summary><pre>' + esc(show(j.tail || '（还没有）')) + '</pre></details>';
+  h += '<div class="chips" style="margin:10px 0 0">';
+  if (j.canStop) h += '<button class="btn" id="btnStop">停下</button><span class="sub" style="margin:0">停下以后，排着队的不再开始；已经开跑的会自己跑完，照样花钱（或用额度）。</span>';
+  if (!j.alive) {
+    if ((j.what !== 'expand' || j.state === 'done') && j.thisProject && (S.ov.rounds || []).some(r => r.id === j.round && r.hasReport)) h += '<button class="btn pri" data-gotround="' + esc(j.round) + '" data-goto="' + (j.what === 'expand' ? 'files' : 'feedback') + '">' +
+      (j.what === 'expand' ? '看写好的建议' : '看玩家说了什么') + '</button>';
+    h += '<button class="btn" id="btnJobClear">知道了，收起</button>';
+  }
+  return h + '</div></div>' + notice;
+}
+function modelInput(id, val) {
+  return '<input type="text" id="' + id + '" list="' + id + 'List" placeholder="空着就用默认" value="' + esc(val || '') + '" style="width:220px">' +
+    '<datalist id="' + id + 'List">' + (S.ov.model.choices || []).map(c => '<option value="' + esc(c) + '">').join('') + '</datalist>';
+}
+
+/* ---------- 花了多少钱 ---------- */
+function vCosts() {
+  let h = '<h1>花了多少钱</h1><p class="sub">每次让 AI 干活都记一笔，全部记在一张表里（表格软件能直接打开）。</p>';
+  const d = S.costs;
+  if (!d) return h + '<div class="card empty">正在读……</div>';
+  const t = d.summary || {}, rows = d.rows || [];
+  if (!rows.length) return h + '<div class="card empty">还没有花过钱。真的跑过检查以后这里才有。</div>';
+  const pr = Object.entries(t.priced || {}).map(([k, v]) => v.toFixed(2) + ' ' + k).join(' + ');
+  h += '<div class="card"><div class="nums" style="grid-template-columns:repeat(3,1fr)">' +
+    '<div class="num kW"><b>' + (t.usd || 0).toFixed(2) + '</b><span>美元（Claude 自己算的）</span></div>' +
+    '<div class="num kL"><b>' + t.tasks + '</b><span>次</span></div>' +
+    '<div class="num ' + (t.failed ? 'kS' : 'kL') + '"><b>' + t.failed + '</b><span>次没成功</span></div></div>' +
+    (pr ? '<p style="margin:0">照你写的价目表算：<b>' + esc(pr) + '</b></p>' : '') +
+    '<p class="sub" style="margin:6px 0 0">用 Claude 官方的时候，"Claude 自己算的"就是账单。用别家的 AI 时它不准，要看"照价目表算"（价目表在设置文件里写）。</p></div>';
+  h += '<div class="card"><h2>按 AI 型号</h2><div class="tw"><table><thead><tr><th>型号</th><th>次数</th><th>美元</th><th>照价目表</th></tr></thead><tbody>' +
+    (t.byModel || []).map(b => '<tr><td>' + esc(b.name) + '</td><td>' + b.tasks + '</td><td>' + b.usd.toFixed(2) + '</td><td>' + esc(Object.entries(b.priced || {}).map(([k, v]) => v.toFixed(2) + ' ' + k).join(' + ')) + '</td></tr>').join('') +
+    '</tbody></table></div></div>';
+  h += '<details class="card"><summary>每一笔（最近的在上面）</summary><div class="tw"><table><thead><tr><th>时间</th><th>做什么</th><th>AI</th><th>美元</th><th>结果</th></tr></thead><tbody>' +
+    rows.slice().reverse().map(r => '<tr><td>' + esc(String(r['开始时间']).slice(5, 16)) + '</td><td>' + esc(r['类别']) + '</td><td>' + esc(r['模型']) + '</td><td>' +
+      esc(r['CLI估的USD'] || (r['按价目表'] ? r['按价目表'] + ' ' + r['币种'] : '-')) + '</td><td>' +
+      (r['结果'] === '成' ? '<span class="tag t-good">成功</span>' : '<span class="tag t-bad">' + esc(String(r['结果']).replace(/^失败/, '没成功')) + '</span>') + '</td></tr>').join('') +
+    '</tbody></table></div><p class="sub" style="margin:8px 0 0">文件：' + esc(show(d.file)) + '</p></details>';
+  return h;
+}
+
+/* ---------- 更多 ---------- */
+function vMore() {
+  if (!S.ov.project) return needProject();
+  const tabs = [['files', '这次的文件'], ['decisions', '做过的决定'], ['players', '玩家类型'], ['methods', '检查方法'], ['templates', '游戏模板'], ['cli', '命令行（给 AI 用）']];
+  let h = '<h1>更多</h1><div class="tabs">' + tabs.map(t => '<button class="btn' + (S.more === t[0] ? ' pri' : '') + '" data-more="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>';
+  if (S.more === 'files') return h + moreFiles();
+  if (S.more === 'decisions') return h + moreDecisions();
+  if (S.more === 'cli') return h + moreCli();
+  if (!S.lib) return h + '<div class="card empty">正在读……</div>';
+  if (S.more === 'players') {
+    const q = S.find.trim().toLowerCase();
+    const list = S.lib.personas.filter(x => !q || (x.n + ' ' + x.name).toLowerCase().includes(q));
+    return h + '<p class="sub">一共 ' + S.lib.personas.length + ' 类玩家。编号在「只问一类玩家」时用得上。</p><div class="chips"><input type="text" id="find" placeholder="找：写编号或几个字" value="' + esc(S.find) + '" style="width:260px"></div>' +
+      '<div class="card"><div class="tw"><table><thead><tr><th>编号</th><th>什么样的玩家</th></tr></thead><tbody>' + list.map(x => '<tr><td><b>' + x.n + '</b></td><td>' + esc(x.name) + '</td></tr>').join('') + '</tbody></table></div></div>';
+  }
+  if (S.more === 'methods') return h + '<p class="sub">AI 去玩的时候按哪种方法查。</p><div class="card"><div class="tw"><table><thead><tr><th>方法</th><th>查什么</th></tr></thead><tbody>' +
+    S.lib.kinds.map(k => '<tr><td><b>' + esc(k.name) + '</b></td><td>' + esc(k.what || '') + '</td></tr>').join('') + '</tbody></table></div></div>';
+  const mine = new Set(S.lib.projectPresets || []);
+  return h + '<p class="sub">一类游戏一份现成的说明：这类游戏里每类玩家一般怎么玩。用法：在游戏的设置文件里写 <code>"presets": ["名字"]</code>。</p>' +
+    ((S.lib.presets || []).map(x => '<div class="card"><h2>' + esc(x.name || x.id) + (mine.has(x.id) ? ' <span class="tag t-good">这个游戏在用</span>' : '') + '</h2><p style="margin:0">' + esc(x.fits || '') + '</p><p class="sub" style="margin:4px 0 0">名字：<code>' + esc(x.id) + '</code></p></div>').join('') || '<div class="card empty">还没有。</div>');
+}
+function moreFiles() {
+  const r = S.round;
+  let h = roundPicker();
+  if (!r || !r.files.length) return h + '<div class="card empty">这次检查的文件夹是空的。</div>';
+  const names = { '合并报告': '总报告', '审查员的报告': '每个 AI 的报告', '内容提案': '加内容的建议', '引文核验': '核对出处', '花费': '这次花了多少', '静态表': '自动检查', '作品地图': '游戏整理表', '草稿': 'AI 的草稿', '任务文件': '交给 AI 的任务', '日志': '运行记录', '别的': '别的' };
+  h += '<div class="split"><div class="card files" style="padding:6px">' + r.files.map(g => '<div class="g">' + esc(names[g.group] || g.group) + '</div>' +
+    g.files.map(f => '<div class="f' + (S.file === f ? ' on' : '') + '" data-file="' + esc(f) + '">' + esc(f) + '</div>').join('')).join('') + '</div><div class="card">';
+  if (!S.file) h += '<div class="empty">在左边点一个文件。</div>';
+  else if (!S.fileData) h += '<div class="empty">正在读……</div>';
+  else h += /\.md$/i.test(S.file) ? md(S.fileData.text, { ids: ids() }) : '<pre>' + esc(S.fileData.text) + '</pre>';
+  return h + '</div></div>';
+}
+// every page action as its terminal command: for an AI or a script (people use the page)
+function moreCli() {
+  const p = S.ov.project, R = S.run, base = ' -p "' + p.file + '"';
+  const g = [...(R.groups || [])].filter(x => p.groups.some(y => y.id === x));
+  const pay = S.ov.pay, payF = pay ? ' --pay ' + pay : '', mdl = R.model ? ' --model ' + R.model : '', pv = S.ov.model.provider;
+  const opt = (g.length ? ' --groups "' + g.join(',') + '"' : '') + (R.split && p.splits.length ? ' --split' : '') + (R.map ? '' : ' --no-map') + ' --parallel ' + (R.parallel || 1) + mdl;
+  const sec = (title, rows) => '<div class="card"><h2>' + title + '</h2>' + rows.map(([what, c, costs]) => '<p style="margin:10px 0 0">' + what + '</p>' + cmdBox(c, costs)).join('') + '</div>';
+  return '<p class="sub">页面上能点的每件事，在终端里也有一句命令。这些是给 AI 和脚本用的（加 <code>--json</code> 出给程序读的结果；说明在工具包的 AGENTS.md）。' +
+    '你自己用页面就行，不用来这里。下面的命令照你现在选的游戏和「开始一次检查」里的选项拼好了。</p>' +
+    sec('开始一次检查', [['先试一下', 'prk plan' + base + opt + payF, false], ['开始检查', 'prk run' + base + opt + payF, payTag(pay)],
+      ['只派一类玩家', 'prk quick "' + (R.who || '15 + 18') + '"' + base + (R.kind && R.kind !== 'persona' ? ' --kind ' + R.kind : '') + mdl + payF, payTag(pay)],
+      ['在 Claude Code 的对话里检查（它会告诉你怎么装、怎么说）', 'prk ask' + base, false]]) +
+    sec('看结果', [['玩家说了什么', 'prk feedback' + base, false], ['以前的检查', 'prk reports' + base, false], ['核对出处', 'prk cite' + base, false], ['花了多少钱', 'prk costs' + base, false]]) +
+    sec('处理问题', [['一条一条记下决定', 'prk decide' + base, false], ['待修清单', 'prk fix' + base, false], ['让 AI 直接修一条', 'prk fix F1' + base + payF, payTag(pay)],
+      ['让 AI 写加内容的建议', 'prk expand' + base + ' --items W1' + payF, payTag(pay)]]) +
+    sec('设置', [['怎么付', 'prk pay ' + (pay || 'sub'), false], ['用哪家的 AI', 'prk provider ' + pv, false], ['钥匙放在哪', 'prk provider setup ' + pv, false],
+      ['用哪个型号', 'prk model ' + (S.ov.model.current || 'default'), false], ['这台电脑', 'prk local', false], ['新加一个游戏', 'prk new', false], ['看看设置对不对', 'prk check' + base, false]]) +
+    sec('不知道下一步', [['照文件算出来的下一步（不花钱）', 'prk guide' + base, false], ['问 AI', 'prk guide "你的问题"' + base, payTag(S.ov.guidePay)]]);
+}
+function moreDecisions() {
+  const d = S.decRows;
+  if (!d) return '<div class="card empty">正在读……</div>';
+  if (!d.rows.length) return '<div class="card empty">还没有做过决定。去「要处理的问题」点一条。</div>';
+  return '<p class="sub">下次检查时，AI 会先看你说要修的修好了没有，你说"本来就这样"的不再报。</p><div class="card"><div class="tw"><table><thead><tr><th>日期</th><th>编号</th><th>你的决定</th><th>为什么</th></tr></thead><tbody>' +
+    d.rows.slice().reverse().map(x => '<tr><td>' + esc(x['日期']) + '</td><td><b>' + esc(x['编号']) + '</b></td><td><span class="tag t-dec">' + esc(decLabel(x['决定'])) + '</span></td><td>' + esc(x['一句原因']) + '</td></tr>').join('') +
+    '</tbody></table></div></div>';
+}
+
+/* ---------- 设置 ---------- */
+function vSettings() {
+  const l = S.ov.local, th = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  const ps = S.ov.providers || [], curP = S.ov.model.provider, d = ps.find(x => x.id === curP) || {};
+  const pay = S.ov.pay, sep = S.ov.payGuideSeparate, gp = S.ov.guidePay;
+  const opt = (name, v, on, small, disabled = false) => '<label class="opt' + (on ? ' on' : '') + '"><input type="radio" name="' + name + '" value="' + v + '"' + (on ? ' checked' : '') + (disabled ? ' disabled' : '') + '> <b>' +
+    PAYTXT[v][0] + '</b><small>' + (small || PAYTXT[v][1]) + '</small></label>';
+  let h = '<h1>设置</h1>';
+  h += '<div class="card"><h2>怎么付</h2><p class="sub" style="margin:0 0 8px">让 AI 去玩游戏（检查）和「问 AI 怎么用」都按这里付。' + (pay ? '' : '还没选：选一个，以后都用它。') + '</p>' +
+    opt('pay', 'sub', pay === 'sub', d.signinProblem ? esc(d.signinProblem) + '。' : '用这台电脑上登录的账号，不另外花钱，但会用掉你的额度。额度用完要等它恢复。', !!d.signinProblem) +
+    opt('pay', 'api', pay === 'api', '用钥匙（key），按用量花钱。检查一次几毛到几块钱，看派了多少 AI。') +
+    '<label style="display:block;margin-top:6px' + (pay ? '' : ';opacity:.5') + '"><input type="checkbox" id="chkPaySep"' + (sep ? ' checked' : '') + (pay || sep ? '' : ' disabled') + '> 问 AI 和检查分开设</label>' +
+    (sep ? '<div style="margin:8px 0 0 22px"><p class="sub" style="margin:0 0 6px">「问 AI 怎么用」单独用：</p>' +
+      opt('guidePay', 'sub', gp === 'sub', '用这台电脑上登录的账号，不另外花钱，但会用掉你的额度。') +
+      opt('guidePay', 'api', gp === 'api', '用钥匙（key）。每问一次大概几分钱到几毛钱。') + '</div>' : '') +
+    '<p class="sub" style="margin:6px 0 0">对话框左下角也能换。</p></div>';
+  const bud = (S.ov.usage || {}).budget;
+  h += '<div class="card"><h2>每个月最多花多少（美元，可不填）</h2><p class="sub" style="margin:0 0 8px">只算按次付费的钱。填了以后，左边的小条到八成变黄，超过了变红。它只提醒你，不会替你停下。</p>' +
+    '<div class="chips" style="margin:0"><span>$</span><input type="number" id="setBudget" min="0" step="1" value="' + (bud || '') + '" placeholder="不填" style="width:120px">' +
+    '<button class="btn pri" id="btnBudget">记住</button>' + (bud ? '<button class="btn" id="btnBudgetClear">不设了</button>' : '') + '</div>' +
+    '<p class="sub" style="margin:6px 0 0">会员额度还剩多少，这里看不到；这里只记这个工具自己用了多少。</p></div>';
+  // which provider, and whether this computer is ready for it, for the pay chosen above
+  const ready = x => pay === 'sub' ? x.signinReady : x.keyReady;
+  const label = x => (ready(x) ? '✓ ' : '　') + (x.name || x.id) + (pay === 'sub' && !x.signin ? '（只能按次付费）' : '');
+  let state;
+  if (pay === 'sub' && !d.signin) state = '<p style="margin:10px 0 0"><span class="dot no"></span>' + esc(d.signinProblem || '这家只能按次付费，用不了会员额度') + '。要用会员额度，换成 Anthropic 或 OpenAI。要用这家，把上面的「怎么付」改成按次付费。</p>';
+  else if (pay === 'sub' && d.signinReady) state = '<p style="margin:10px 0 0"><span class="dot ok"></span>用这台电脑上 ' + esc(d.signinWith) + ' 登录的账号，不用钥匙。</p>';
+  else if (pay === 'sub') state = '<p style="margin:10px 0 0"><span class="dot no"></span>这台电脑上没找到 ' + esc((S.ov.engineNames || {})[d.engine] || d.signinWith || '') + '。先装好，再登录一次。</p>';
+  else state = '<p style="margin:10px 0 0">' + (d.keyReady ? '<span class="dot ok"></span>这台电脑已经设好了钥匙（key）。' : '<span class="dot no"></span>还没设好钥匙（key）：在下面填它放在哪。') + '</p>' +
+    (pay ? '' : '<p class="sub" style="margin:4px 0 0">只用会员额度的话，不用设钥匙：在上面选「用会员额度」。</p>') +
+    (d.keyReady ? '<details><summary>改钥匙放在哪、默认型号</summary>' + providerForm() + '</details>' : providerForm());
+  h += '<div class="card"><h2>用哪家的 AI</h2><select id="selProvider" style="min-width:min(320px,100%);max-width:100%">' +
+    ps.map(x => '<option value="' + esc(x.id) + '"' + (x.id === curP ? ' selected' : '') + (pay === 'sub' && x.signinProblem ? ' disabled' : '') + '>' + esc(label(x)) + '</option>').join('') + '</select>' + state +
+    (d.note ? '<details><summary>这家要注意的</summary><p style="margin:4px 0">' + esc(d.note) + '</p><p class="sub" style="margin:0">官方说明：' + esc(d.docs || '') + '（' + esc(d.checked || '') + ' 核对）</p></details>' : '') +
+    '<h2 style="margin-top:16px">用哪个型号</h2><div class="chips" style="margin:0">' + modelInput('setModel', S.ov.model.remembered) + '<button class="btn pri" id="btnModel">记住</button>' +
+    (S.ov.model.remembered ? '<button class="btn" id="btnModelClear">用回默认</button>' : '') + '</div>' +
+    '<p class="sub" style="margin:6px 0 0">现在用：' + esc(S.ov.model.current || '默认') + '。越大的型号越贵（用会员额度时用得越快），换了以后先试一个小的检查。</p></div>';
+  h += '<div class="row2"><div class="card"><h2>这台电脑</h2>' +
+    '<div><span class="dot ' + (l.claude ? 'ok' : 'no') + '"></span>Claude Code：' + (l.claude ? '装好了' : '没找到') + '</div>' +
+    '<div><span class="dot ' + (l.providerReady ? 'ok' : 'no') + '"></span>' + esc(l.providerName || 'AI') + '：' +
+      (pay === 'sub' && !l.providerSignin ? '只能按次付费' : l.providerReady ? (pay === 'sub' ? '能用会员额度' : '设好了') : '还没设好') + '</div>' +
+    '<div><span class="dot ' + (l.powershell ? 'ok' : 'no') + '"></span>PowerShell：' + (l.powershell ? '有' : '没找到') + '</div>' + machineForm() + '</div>' +
+    '<div class="card"><h2>样子</h2><label><input type="radio" name="theme" value="dark"' + (th === 'dark' ? ' checked' : '') + '> 深色</label>　<label><input type="radio" name="theme" value="light"' + (th === 'light' ? ' checked' : '') + '> 浅色</label></div></div>';
+  h += '<div class="card" style="margin-top:16px"><h2>隐私</h2><p style="margin:0">这个页面只在这台电脑上打开，不上网。问 AI 的时候只发你写的问题和几个数字，不发游戏的名字、文件和钥匙。</p></div>';
+  return h;
+}
+
+// where one provider's key is (a file's path or a variable's name: never the key), its fields, its default model
+function formEdit(f) {
+  const e = { key: f.key, keyFile: f.keyFile, keyEnv: f.keyEnv, model: f.model, promptOnly: f.promptOnly };
+  (f.fields || []).forEach(x => { e['f_' + x.key] = x.value; });
+  return e;
+}
+function keyState(f, kind) {
+  const c = f.check || {}, e = S.pedit;
+  if (kind === 'file' && 'fileFound' in c && e.keyFile === f.keyFile)
+    return '<p class="sub" style="margin:2px 0 6px"><span class="dot ' + (c.fileFound ? 'ok' : 'no') + '"></span>' + (c.fileFound ? '找到了这个文件。（里面写的什么，页面不看。）' : '没找到这个文件：路径对吗？') + '</p>';
+  if (kind === 'env' && 'envSet' in c && e.keyEnv === f.keyEnv)
+    return '<p class="sub" style="margin:2px 0 6px"><span class="dot ' + (c.envSet ? 'ok' : 'no') + '"></span>' + (c.envSet ? '这个变量现在有值。（是什么，页面不看。）' :
+      '这个变量现在是空的。刚设的话：点左下角「退出」，再双击「玩家视角审查.exe」打开一次，才看得到（检查也一样）。') + '</p>';
+  return '';
+}
+function providerForm() {
+  const f = S.pform;
+  if (!f || f.name !== S.ov.model.provider) return '<p class="sub"><span class="spin"></span>正在读……</p>';
+  if (f.error) return '<p class="note">' + esc(f.error) + '</p>';
+  const e = S.pedit, radio = (v, t) => '<label style="display:block;margin-top:4px"><input type="radio" name="pfKey" value="' + v + '"' + (e.key === v ? ' checked' : '') + '> ' + t + '</label>';
+  let h = '<div class="form" style="margin-top:8px"><p class="sub" style="margin:0 0 6px">只问钥匙放在哪，不问钥匙本身。钥匙文件里写的东西，这个页面不打开、不显示。</p>';
+  h += f.fields.map(x => '<label class="f"><span>' + esc(x.label) + '</span><input type="text" data-pf="' + esc(x.key) + '" value="' + esc(e['f_' + x.key] ?? '') + '"></label>').join('');
+  h += '<div style="margin:8px 0"><span class="sub" style="margin:0;display:block;font-size:13px">钥匙放在哪（选一种）</span>' +
+    radio('file', '一个文本文件（里面只放钥匙）') + (e.key === 'file' ? '<input type="text" id="pfKeyFile" placeholder="这个文件的完整路径" value="' + esc(e.keyFile) + '" style="width:100%">' + keyState(f, 'file') : '') +
+    radio('env', '一个环境变量') + (e.key === 'env' ? '<input type="text" id="pfKeyEnv" placeholder="变量的名字，例：DEEPSEEK_API_KEY" value="' + esc(e.keyEnv) + '" style="width:100%">' + keyState(f, 'env') : '') +
+    (f.keyNeeded ? '' : radio('none', '不用钥匙（用上面写的方式登录）')) + '</div>';
+  h += '<label class="f"><span>默认用哪个型号（可以不填' + (f.modelDefault ? '：不填就用 ' + esc(f.modelDefault) : '') + '）</span><input type="text" id="pfModel" value="' + esc(e.model) + '"></label>';
+  if (f.engine !== 'claude-code') h += '<label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="pfPrompt"' + (e.promptOnly ? ' checked' : '') + '>' +
+    '<span>我接受：不许读的文件夹只能靠提示，挡不住</span></label><p class="sub" style="margin:2px 0 8px 22px">这一家用 ' + esc(f.engineName) + ' 去玩游戏，不是 Claude Code。' +
+    'Claude Code 能用规则挡住「不许读」的文件夹（放钥匙、放私人东西的地方）；它不能，只能在交给它的话里叮嘱它别去读，它不听的话没有东西拦着。不勾的话，游戏的设置里写了不许读的文件夹时，它不会跑。</p>';
+  if (!f.program) h += '<p class="note" style="margin:6px 0">这台电脑上没找到 ' + esc(f.engineName) + '。先装好' + (f.engine === 'claude-code' ? '；装在不常见的地方的话，在下面「这台电脑」里写上它在哪。' : '。') + '</p>';
+  return h + '<button class="btn pri" id="btnPfSave">保存</button><p class="sub" style="margin:6px 0 0">写进这台电脑的设置：' + esc(show(f.file)) + '</p></div>';
+}
+// where Python and Claude Code are (can stay empty: then the usual ones)
+function machineForm() {
+  const m = S.ov.machine || {}, e = S.medit || (S.medit = { python: m.python || '', claudeExe: m.claudeExe || '' });
+  return '<details style="margin-top:8px"><summary>Python、Claude Code 装在哪（可以不填）</summary><div class="form">' +
+    '<label class="f"><span>Python（空着 = 用现在这个）</span><input type="text" id="mPython" value="' + esc(e.python) + '"></label>' +
+    '<label class="f"><span>Claude Code（程序本身，或装它的文件夹；空着 = 用找得到的那个）</span><input type="text" id="mClaude" value="' + esc(e.claudeExe) + '"></label>' +
+    '<button class="btn pri" id="btnLocalSave">保存</button><p class="sub" style="margin:6px 0 0">只检查这两个地方在不在。写进：' + esc(show(m.file || '')) + '</p></div></details>';
+}
+
+/* ---------- 新加一个游戏 ---------- */
+function vNewGame() {
+  const F = S.newForm, e = S.newEdit;
+  let h = '<h1>新加一个游戏</h1><p class="sub">请填写项目文件夹、源码文件夹和报告输出文件夹。其他路径可以留空。</p>';
+  if (!F) return h + '<div class="card empty">正在读……</div>';
+  const inp = (key, label, val, ph) => {
+    const error = S.newFields[key];
+    return '<label class="f"><span>' + esc(label) + '</span><input type="text" data-np="' + key + '" value="' + esc(val) + '"' +
+      (ph ? ' placeholder="' + esc(ph) + '"' : '') + (error ? ' aria-invalid="true" aria-describedby="np-' + key + '-error"' : '') + '>' +
+      (error ? '<span class="note" id="np-' + key + '-error">' + esc(show(error)) + '</span>' : '') + '</label>';
+  };
+  h += '<div class="card form">' + inp('id', '给它起个英文名字（字母、数字、- 和 _），当设置文件的名字用', e.id || '', '例：my-game') +
+    F.questions.map(q => inp(q.key, q.label, e[q.key] ?? q.default)).join('') +
+    '<label style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" data-np="isMod"' + (e.isMod ? ' checked' : '') + '><span>这是模组（依附在别的游戏上）</span></label>' +
+    inp('folder', '这份设置文件放在哪个文件夹（空着 = 工具包的 projects 文件夹）', e.folder || '', show(F.folder)) +
+    (S.newErr ? '<div class="note">' + esc(show(S.newErr)) + '</div>' : '') +
+    '<div class="chips" style="margin:10px 0 6px"><button class="btn pri" id="btnNewSave">建好</button><button class="btn" data-view="home">不建了</button></div>' +
+    '<p class="sub" style="margin:0">报告文件夹可以在第一次检查时创建。建好以后会自动选中它。</p></div>';
+  return h;
+}
+
+/* ---------- 问 AI 怎么用（侧边对话） ---------- */
+const SUGG = ['我第一次用，从哪开始？', '这次检查的结果我该先看什么？', '怎么只派一类玩家去玩？', '怎么用到我自己的游戏上？'];
+function drawHelp() {
+  $('.app').classList.toggle('chat-on', S.help);
+  const el = $('#chat');
+  if (!S.help) { el.innerHTML = ''; return; }
+  const q = $('#q'); if (q) S.draft = q.value;
+  const focus = document.activeElement && document.activeElement.id === 'q';
+  let log = '';
+  if (!S.chat.length) {
+    log = '<div class="hello"><b>有什么不会的，问我</b>我只看这个工具的说明书，告诉你一步一步怎么做。我不会替你做，也不会改你的游戏。</div>' +
+      '<div class="sugg">' + SUGG.map(c => '<button data-q="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>';
+  } else {
+    log = S.chat.map((m, i) => m.q ? '<div class="you"><div>' + esc(m.q) + '</div></div>' :
+      '<div class="ai' + (m.err ? ' err' : '') + '">' + (m.err ? esc(m.err) : md(m.a)) +
+      '<div class="bar">' + (m.err ? '' : '<button class="icon" data-copyans="' + i + '" title="复制">⧉</button>') + (m.meta ? '<span>' + esc(m.meta) + '</span>' : '') + '</div></div>').join('');
+  }
+  if (S.asking) log += '<div class="think"><span class="spin"></span>在想……一般要半分钟到两分钟</div>';
+  const mode = S.ov.guidePay || '', ai = curProvider();
+  // the guide on "sub" uses the provider's own login; a provider that can only be paid by key: Claude Code's login
+  const subName = '用会员额度' + (ai.signin ? '' : '（Claude Code 的登录）');
+  el.innerHTML = '<div class="hd"><b>问 AI 怎么用</b>' +
+    (S.chat.length ? '<button class="icon" id="btnClearChat" title="新对话">＋</button>' : '') +
+    '<button class="icon" id="btnHelpClose" title="收起">✕</button></div>' +
+    '<div class="log" id="chatLog">' + log + '</div>' +
+    '<div class="composer"><textarea id="q" rows="1" placeholder="问点什么……"' + (S.asking ? ' disabled' : '') + '></textarea>' +
+    '<div class="tools"><select id="selMode" title="问 AI 用什么付' + (S.ov.payGuideSeparate ? '（问 AI 单独设的）' : '（和检查一样；在「设置」里可以分开设）') + '">' +
+    (mode ? '' : '<option value="" selected>先选用什么付</option>') +
+    '<option value="sub"' + (mode === 'sub' ? ' selected' : '') + '>' + esc(subName) + '</option>' +
+    '<option value="api"' + (mode === 'api' ? ' selected' : '') + '>按次付费（' + esc((S.ov.providers || []).find(x => x.id === S.ov.model.provider) ? ((S.ov.providers || []).find(x => x.id === S.ov.model.provider).name || '').replace(/（.*$/, '') : 'AI') + '）</option>' +
+    '</select><span class="sp"></span><button class="send" id="btnAsk" title="发送（Enter）"' + (S.asking ? ' disabled' : '') + '>↑</button></div></div>' +
+    '<div class="hint">Enter 发送，Shift + Enter 换行</div>';
+  const t = $('#q'); t.value = S.draft || ''; grow(t);
+  if (focus || S.focusChat) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); S.focusChat = false; }
+  const b = $('#chatLog'); b.scrollTop = b.scrollHeight;
+}
+function grow(t) { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 200) + 'px'; }
+function openChat(q) { S.help = true; store('prk.chat', '1'); if (q !== undefined) S.draft = q; S.focusChat = true; draw(); }
+async function askGuide(q) {
+  q = (q || '').trim();
+  if (!q || S.asking) return;
+  const mode = S.ov.guidePay || '';
+  if (!mode) { toast('先在左下角选用什么付'); const s = $('#selMode'); if (s) s.focus(); return; }
+  if (mode === 'api' && !S.okCost) {
+    if (!confirm('按次付费：问这一次要花一点钱（一般几分钱到几毛钱）。继续吗？\n（这次打开页面期间不再问）')) return;
+    S.okCost = true;
+  }
+  const history = [];
+  for (let i = 0; i + 1 < S.chat.length; i += 2) if (S.chat[i].q && S.chat[i + 1].a) history.push({ q: S.chat[i].q, a: S.chat[i + 1].a });
+  const qe = $('#q'); if (qe) qe.value = '';     // drawHelp keeps what is in the box: empty it first
+  S.chat.push({ q }); S.asking = true; S.draft = ''; S.focusChat = true; draw();
+  const r = await api('/api/guide', { question: q, mode, history: history.slice(-3), confirmed: true });
+  S.asking = false; S.focusChat = true;
+  if (r && r.ok) S.chat.push({ a: r.answer, meta: r.seconds + ' 秒 · ' + (mode === 'api' ? '按次付费' + (r.cost != null ? ' · 花了 ' + Number(r.cost).toFixed(4) + ' 美元' : '') : '用会员额度') });
+  else S.chat.push({ err: (r && r.error) || '没有回答。' });
+  if (r && r.stale) { S.chat.pop(); S.chat.pop(); S.draft = q; S.okCost = false; toast(r.error); return loadAll(true); }
+  draw();
+}
+
+/* ---------- clicks ---------- */
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest('[data-view],[data-copy],[data-copyai],[data-filter],[data-entry],[data-decide],[data-fix],[data-fixsel],[data-file],[data-more],[data-ref],[data-q],[data-ask],[data-copyans],' +
+    '[data-modal],[data-run],[data-expand],[data-gotround],#btnAsk,#btnModel,#btnModelClear,#btnBudget,#btnBudgetClear,#btnFixRefresh,#btnHelp,#btnHelpClose,#btnClearChat,#btnQuit,' +
+    '#btnStop,#btnJobClear,#btnCite,#btnPfSave,#btnLocalSave,#btnNewSave');
+  if (!t || t.disabled) return;
+  if (t.dataset.modal) {
+    if (t.dataset.modal === 'go') return confirmStart();
+    if (S.modal && S.modal.starting) return;
+    S.modal = null; drawModal();
+    if (!t.dataset.view) return;
+  }
+  if (t.dataset.copy !== undefined) return copy(t.dataset.copy);
+  if (t.dataset.copyai !== undefined) return copy(t.dataset.copyai, '复制好了，去你的 AI 对话里粘贴');
+  if (t.dataset.view) {
+    S.view = t.dataset.view; if (t.dataset.moretab) S.more = t.dataset.moretab;
+    if (S.view === 'fixes') S.fixes = null; if (S.view === 'costs') S.costs = null; if (S.view === 'newgame') { S.newErr = ''; S.newFields = {}; }
+    if (t.dataset.round && t.dataset.round !== S.rid) { S.rid = t.dataset.round; return loadRound(false); }
+    return draw();
+  }
+  if (t.dataset.run) return t.dataset.run === 'plan' ? doPlan('run') : t.dataset.run === 'qplan' ? doPlan('quick') : openStart(t.dataset.run);
+  if (t.dataset.expand !== undefined) return openStart('expand', { items: t.dataset.expand, round: t.dataset.round, report: t.dataset.report });
+  if (t.dataset.gotround) {
+    S.rid = t.dataset.gotround; S.view = t.dataset.goto === 'files' ? 'more' : 'feedback'; S.more = 'files';
+    return loadRound(false);
+  }
+  if (t.id === 'btnStop') {
+    const n = S.job ? S.job.running : 0;
+    if (!confirm('停下这次检查？\n\n排着队的不再开始。' + (n ? '已经开跑的 ' + n + ' 个停不下来：它们会自己跑完，照样花钱（或用额度）。' : '已经开跑的会自己跑完，照样花钱（或用额度）。'))) return;
+    const r = await api('/api/jobs/stop', {});
+    if (!r || !r.ok) toast((r && r.error) || '停不下来', 4000); else toast('正在停，排着队的不会再开始', 3500);
+    return pollJob();
+  }
+  if (t.id === 'btnJobClear') {
+    const r = await api('/api/jobs/clear', {});
+    if (!r?.ok) { toast(r?.error || '没能收起这次检查'); return pollJob(); }
+    S.job = null; S.watching = null; return drawJob();
+  }
+  if (t.id === 'btnCite') {
+    t.disabled = true; t.textContent = '正在核对……';
+    const r = await api('/api/cite', { round: t.dataset.round || (S.round && !S.round.sample ? S.rid : '') });
+    if (!r || !r.ok) { toast((r && r.error) || '没核成', 4000); return draw(); }
+    S.rid = r.round; await loadRound(false);
+    S.view = 'more'; S.more = 'files'; S.file = r.file; S.fileData = null; draw();
+    const d = await api('/api/file?round=' + encodeURIComponent(S.rid) + '&name=' + encodeURIComponent(S.file));
+    S.fileData = d && d.text !== undefined ? d : { text: '读不了这个文件。' };
+    return draw();
+  }
+  if (t.id === 'btnPfSave') {
+    const f = S.pform, e = S.pedit, values = { model: e.model || '' };
+    f.fields.forEach(x => { values[x.key] = e['f_' + x.key] ?? ''; });
+    if (f.keyNeeded && !e.key) return toast('先选钥匙放在哪：一个文本文件，还是一个环境变量', 3500);
+    if (e.key) values.key = e.key;
+    if (e.key === 'file') values.keyFile = e.keyFile || '';
+    if (e.key === 'env') values.keyEnv = e.keyEnv || '';
+    if (f.engine !== 'claude-code') values.promptOnly = !!e.promptOnly;
+    const r = await api('/api/provider/setup', { name: f.name, values });
+    if (!r || !r.ok) return toast((r && r.error) || '没存上', 4000);
+    S.pform = Object.assign({ ok: true }, r.form); S.pedit = formEdit(S.pform);
+    toast('存好了（钥匙本身没有写进去）', 3000); return loadAll(true);
+  }
+  if (t.id === 'btnLocalSave') {
+    const r = await api('/api/local', { python: S.medit.python, claudeExe: S.medit.claudeExe });
+    if (!r || !r.ok) return toast((r && r.error) || '没存上', 4000);
+    S.medit = null; toast('存好了'); return loadAll(true);
+  }
+  if (t.id === 'btnNewSave') {
+    const e = S.newEdit, values = { id: e.id || '', isMod: !!e.isMod };
+    (S.newForm.questions || []).forEach(q => { values[q.key] = e[q.key] ?? q.default; });
+    const r = await api('/api/newproject', { values, folder: e.folder || '' });
+    if (!r || !r.ok) { S.newErr = (r && r.error) || '没建成。'; S.newFields = r?.missing || {}; return draw(); }
+    S.newEdit = {}; S.newErr = ''; S.newFields = {}; S.run.groups = null; S.costs = null; S.lib = null; S.plan = null; S.view = 'home';
+    toast('建好了，已经选中它', 3000); return loadAll(false);
+  }
+  if (t.dataset.fixsel) { S.fixSel = S.fixSel === t.dataset.fixsel ? null : t.dataset.fixsel; return draw(); }
+  if (t.dataset.fix) return fixAction(t.dataset.fix, t.dataset.id);
+  if (t.id === 'btnFixRefresh') return loadAll(true);
+  if (t.id === 'btnBudget' || t.id === 'btnBudgetClear') {
+    const r = await api('/api/budget', { budget: t.id === 'btnBudget' ? $('#setBudget').value : '' });
+    if (!r.ok) return toast(r.error || '没记上');
+    toast(t.id === 'btnBudget' ? '记住了' : '不设了'); return loadAll(true);
+  }
+  if (t.dataset.filter) { S.filter = t.dataset.filter; S.view = 'problems'; return draw(); }
+  if (t.dataset.entry) { S.sel = t.dataset.entry; return draw(); }
+  if (t.dataset.more) { S.more = t.dataset.more; return draw(); }
+  if (t.dataset.ref) {
+    const e = S.round.entries.find(x => x.id === t.dataset.ref);
+    if (e) { S.sel = e.report + '|' + e.id; S.filter = 'all'; S.todo = false; S.view = 'problems'; draw(); }
+    return;
+  }
+  if (t.dataset.decide) {
+    const cut = S.sel.lastIndexOf('|'), report = S.sel.slice(0, cut), id = S.sel.slice(cut + 1);
+    const r = await api('/api/decide', { round: S.rid, report, id, decision: t.dataset.decide, why: $('#why') ? $('#why').value : '' });
+    if (!r.ok) return toast(r.error || '没记上');
+    toast('记下了：' + decLabel(t.dataset.decide) + (r.fix ? '。已经放进待修清单（' + r.fix + '）' : '') +
+      (r.removed && r.removed.length ? '。已经从待修清单拿掉（' + r.removed.join('、') + '）' : '') + (r.fixError ? '。' + r.fixError : ''), 3200);
+    return loadAll(true);
+  }
+  if (t.dataset.file) {
+    S.file = t.dataset.file; S.fileData = null; draw();
+    const d = await api('/api/file?round=' + encodeURIComponent(S.rid) + '&name=' + encodeURIComponent(S.file));
+    S.fileData = d && d.text !== undefined ? d : { text: '读不了这个文件。' };
+    return draw();
+  }
+  if (t.dataset.q) return askGuide(t.dataset.q);
+  if (t.dataset.ask) return openChat(t.dataset.ask);
+  if (t.dataset.copyans !== undefined) { const m = S.chat[+t.dataset.copyans]; return copyPlain(m && m.a || ''); }
+  if (t.id === 'btnHelp') { if (S.help) { S.help = false; store('prk.chat', '0'); return draw(); } return openChat(); }
+  if (t.id === 'btnHelpClose') { S.help = false; store('prk.chat', '0'); return draw(); }
+  if (t.id === 'btnClearChat') { if (!S.asking) { S.chat = []; S.focusChat = true; } return draw(); }
+  if (t.id === 'btnAsk') return askGuide($('#q').value);
+  if (t.id === 'btnModel' || t.id === 'btnModelClear') {
+    const r = await api('/api/model', { model: t.id === 'btnModel' ? $('#setModel').value : 'default' });
+    if (!r.ok) return toast(r.error || '没记上');
+    toast(t.id === 'btnModel' ? '记住了' : '用回默认了'); return loadAll(true);
+  }
+  if (t.id === 'btnQuit') {
+    if (S.job && S.job.alive && !confirm('有一次检查在跑。退出页面不会停下它：它会在后台接着跑完（照样花钱或用额度）。\n再双击「玩家视角审查.exe」打开，就能看到进度。\n\n退出吗？')) return;
+    const r = await api('/api/quit', {}).catch(() => null);
+    if (!r?.ok) return toast(r?.error || '没有收到退出确认。', 4000);
+    document.body.innerHTML = '<div class="empty" style="padding-top:30vh">已经关好了，可以关掉这个窗口。<br>下次双击「玩家视角审查.exe」再打开。</div>';
+  }
+});
+document.addEventListener('change', async ev => {
+  const t = ev.target;
+  if (t.id === 'selProject' && t.value === '__new__') { S.view = 'newgame'; S.newErr = ''; S.newFields = {}; return draw(); }
+  if (t.id === 'selProject' && t.value) {
+    const r = await api('/api/project', { path: t.value });
+    if (!r.ok) toast(r.error || '换不了');
+    S.run.groups = null; S.costs = null; S.lib = null; S.plan = null;
+    if (S.view === 'newgame') S.view = 'home';
+    return loadAll(false);
+  }
+  if (t.id === 'selRound') { S.rid = t.value; return loadRound(false); }
+  if (t.id === 'selProvider') { const r = await api('/api/provider', { provider: t.value }); toast(r.ok ? '换好了' : (r.error || '换不了')); S.pform = null; S.plan = null; return loadAll(true); }
+  if (t.name === 'mpay' && S.modal) { S.modal.pay = t.value; return drawModal(); }
+  if (t.name === 'pfKey' && S.pedit) { S.pedit.key = t.value; return draw(); }
+  if (t.id === 'pfPrompt' && S.pedit) { S.pedit.promptOnly = t.checked; return; }
+  if (t.dataset.np === 'isMod') { S.newEdit.isMod = t.checked; return; }
+  if (t.id === 'runKind') { S.run.kind = t.value; return; }
+  if (t.id === 'chkTodo') { S.todo = t.checked; return draw(); }
+  // how to pay: the shared choice, or the guide's own when it is set apart (the chat's box changes whichever the guide uses)
+  if (t.name === 'pay' || t.name === 'guidePay' || t.id === 'selMode' || t.id === 'chkPaySep') {
+    let body;
+    if (t.id === 'chkPaySep') body = { guidePay: t.checked ? (S.ov.pay || 'sub') : 'same' };
+    else if (t.id === 'selMode') { if (!t.value) return; body = S.ov.payGuideSeparate ? { guidePay: t.value } : { pay: t.value }; }
+    else body = { [t.name]: t.value };
+    const r = await api('/api/pay', body);
+    S.okCost = false;
+    toast(r && r.ok ? '记住了' : ((r && r.error) || '没记上'));
+    return loadAll(true);
+  }
+  if (t.name === 'theme') return setTheme(t.value);
+  if (t.dataset.group) { t.checked ? S.run.groups.add(t.dataset.group) : S.run.groups.delete(t.dataset.group); return draw(); }
+  if (t.id === 'runSplit') { S.run.split = t.checked; return draw(); }
+  if (t.id === 'runMap') { S.run.map = t.checked; return draw(); }
+});
+// typing only keeps what is typed: no redraw (a redraw would take away the button the person is about to click)
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.id === 'runPar') { S.run.parallel = Math.max(1, Math.min(12, parseInt(t.value, 10) || 1)); return; }
+  if (t.id === 'runWho') { S.run.who = t.value; return; }
+  if (t.id === 'runModel') { S.run.model = t.value.trim().replace(/[^A-Za-z0-9._:\-\[\]\/@~]/g, ''); return; }
+  if (t.dataset.pf && S.pedit) { S.pedit['f_' + t.dataset.pf] = t.value; return; }
+  if (t.id === 'pfKeyFile' && S.pedit) { S.pedit.keyFile = t.value; return; }
+  if (t.id === 'pfKeyEnv' && S.pedit) { S.pedit.keyEnv = t.value; return; }
+  if (t.id === 'pfModel' && S.pedit) { S.pedit.model = t.value; return; }
+  if (t.id === 'mPython' && S.medit) { S.medit.python = t.value; return; }
+  if (t.id === 'mClaude' && S.medit) { S.medit.claudeExe = t.value; return; }
+  if (t.dataset.np && t.type === 'text') { S.newEdit[t.dataset.np] = t.value; return; }
+  if (ev.target.id === 'q') { S.draft = ev.target.value; grow(ev.target); return; }
+  if (ev.target.id === 'find') { S.find = ev.target.value; const pos = ev.target.selectionStart; draw(); const el = $('#find'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }
+});
+document.addEventListener('keydown', ev => {
+  if (ev.target.id === 'q' && ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); askGuide(ev.target.value); }
+  if (ev.key === 'Escape' && S.modal && !S.modal.starting) { S.modal = null; drawModal(); }
+});
+async function copyPlain(t) { try { await navigator.clipboard.writeText(t); } catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } toast('复制好了'); }
+// drag the line between the page and the chat to change the chat's width (remembered)
+(function () {
+  const d = $('#drag'); let on = false;
+  const w = parseInt(store('prk.chatw') || '', 10); if (w > 280) document.documentElement.style.setProperty('--chatw', w + 'px');
+  d.addEventListener('mousedown', e => { on = true; d.classList.add('on'); e.preventDefault(); });
+  window.addEventListener('mousemove', e => { if (!on) return; const nw = Math.max(300, Math.min(window.innerWidth - 520, window.innerWidth - e.clientX)); document.documentElement.style.setProperty('--chatw', nw + 'px'); });
+  window.addEventListener('mouseup', () => { if (!on) return; on = false; d.classList.remove('on'); store('prk.chatw', parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chatw'), 10)); });
+})();
+S.help = store('prk.chat') === '1';
+function setTheme(v) { document.documentElement.dataset.theme = v; store('prk.theme', v); draw(); }
+document.documentElement.dataset.theme = store('prk.theme') === 'light' ? 'light' : 'dark';
+// heartbeat: while a window is open the service keeps running; after the last one closes it stops by itself
+function ping() { fetch('/api/ping', { headers: { 'X-PRK-Token': TOKEN } }).catch(() => {}); }
+ping(); setInterval(ping, 20000);
+loadAll(false);
+</script>
+</body>
+</html>

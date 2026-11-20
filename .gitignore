@@ -1,0 +1,14 @@
+# machine settings: where the key and private folders are on one computer
+local.json
+# real projects are private by default; share one on purpose by removing it from here
+projects/*.json
+!projects/_template.json
+projects/*.md
+# outputs
+__pycache__/
+*.py[cod]
+*.exe
+review_out/
+review_out_*/
+# the guide's task and log files (one pair per question)
+.guide/

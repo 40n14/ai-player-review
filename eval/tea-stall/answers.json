@@ -1,0 +1,479 @@
+{
+  "_说明": "例子游戏「茶摊」的答案表：评测审查员用。审查员不许读这个文件夹（例子项目的 neverRead 里有它）。issues = 埋进去的真问题；decoys = 看着像问题、其实不是的（报了算误报）。一条发现算「找到了」：它的索引里有一行，文件名对得上 file，而且那一行的原文里有 tokens 里的任何一个词。kinds = 哪几种走法应该找到它；static = 自带的文字检查能不能直接抓到。改了例子游戏，这里跟着改。 wants = 埋好的缺口（玩家想要、作品没给的选项）：按同样的办法配，单独算。",
+  "issues": [
+    {
+      "id": "T1",
+      "what": "老周被拒绝后的那句只有中文，英文版会显示键名",
+      "class": "J 语言",
+      "file": "zh.csv",
+      "tokens": [
+        "zhou_refused"
+      ],
+      "also": [
+        {
+          "file": "en.csv",
+          "tokens": [
+            "zhou_refused"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona"
+      ],
+      "static": true
+    },
+    {
+      "id": "T2",
+      "what": "阿婆送花那句英文没翻",
+      "class": "J 语言",
+      "file": "en.csv",
+      "tokens": [
+        "granny_last_warm"
+      ],
+      "also": [
+        {
+          "file": "zh.csv",
+          "tokens": [
+            "granny_last_warm"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona"
+      ],
+      "static": true
+    },
+    {
+      "id": "T3",
+      "what": "阿婆道谢那句中文有 {0}、英文没有",
+      "class": "J 语言",
+      "file": "zh.csv",
+      "tokens": [
+        "granny_thanks"
+      ],
+      "also": [
+        {
+          "file": "en.csv",
+          "tokens": [
+            "granny_thanks"
+          ]
+        }
+      ],
+      "severity": "轻",
+      "kinds": [
+        "persona"
+      ],
+      "static": true
+    },
+    {
+      "id": "T4",
+      "what": "老周道谢那句是占位的字，玩家会看到「（占位）」",
+      "class": "F 文字",
+      "file": "zh.csv",
+      "tokens": [
+        "zhou_stay_thanks"
+      ],
+      "also": [
+        {
+          "file": "en.csv",
+          "tokens": [
+            "zhou_stay_thanks"
+          ]
+        },
+        {
+          "file": "zhou.json",
+          "tokens": [
+            "zhou_stay_thanks"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona"
+      ],
+      "static": true
+    },
+    {
+      "id": "T5",
+      "what": "设置说明提前说出老周是逃兵（设定是第 6 天才知道）",
+      "class": "F 剧透",
+      "file": "zh.csv",
+      "tokens": [
+        "option_hints_tip"
+      ],
+      "also": [
+        {
+          "file": "en.csv",
+          "tokens": [
+            "option_hints_tip"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "content"
+      ],
+      "static": true
+    },
+    {
+      "id": "T6",
+      "what": "说明页说同时招待三位，设置里座位是 2",
+      "class": "F 说明和实际不符",
+      "file": "zh.csv",
+      "tokens": [
+        "guide_page_1"
+      ],
+      "also": [
+        {
+          "file": "en.csv",
+          "tokens": [
+            "guide_page_1"
+          ]
+        },
+        {
+          "file": "settings.json",
+          "tokens": [
+            "seats"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "walkthrough"
+      ],
+      "static": true
+    },
+    {
+      "id": "T7",
+      "what": "阿婆第一次来就说「老样子」",
+      "class": "B 台词连续",
+      "file": "zh.csv",
+      "tokens": [
+        "granny_first_1"
+      ],
+      "also": [
+        {
+          "file": "granny.json",
+          "tokens": [
+            "granny_first_1"
+          ]
+        },
+        {
+          "file": "en.csv",
+          "tokens": [
+            "granny_first_1"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "ledger"
+      ],
+      "static": false
+    },
+    {
+      "id": "T8",
+      "what": "阿婆的钱（10）不够一壶茉莉（12）：不少收就只能不卖，两次以后她不再来。不肯少收的玩家被惩罚",
+      "class": "C 东西和钱 / G 手感",
+      "file": "granny.json",
+      "tokens": [
+        "budget",
+        "refusedInARow",
+        "leaveForever"
+      ],
+      "also": [
+        {
+          "file": "settings.json",
+          "tokens": [
+            "jasmine"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "softlock",
+        "economy"
+      ],
+      "static": false
+    },
+    {
+      "id": "T9",
+      "what": "第 7 天：老周没被带走、少收不到两次时，阿婆最后一天没有任何台词",
+      "class": "B 台词 / A 卡住",
+      "file": "granny.json",
+      "tokens": [
+        "lastDay",
+        "granny_last_cold",
+        "granny_last_warm",
+        "discounts>=2"
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "ledger"
+      ],
+      "static": false,
+      "note": "和 T10 用同一段数据：要看发现说的是「没有台词」还是「冷话 + 送花」"
+    },
+    {
+      "id": "T10",
+      "what": "第 7 天：老周被带走、又少收过两次时，阿婆说冷话「茶我不喝了」却照样送花",
+      "class": "B 台词和状态对不上",
+      "file": "granny.json",
+      "tokens": [
+        "gift",
+        "dried_flowers",
+        "granny_last_cold"
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "ledger"
+      ],
+      "static": false,
+      "note": "见 T9 的说明"
+    },
+    {
+      "id": "T11",
+      "what": "老周第 6 天才说来历，但阿婆隔天来（1、3、5、7），第 6 天不在；她第 7 天却知道「昨夜把人带走了」。可以解释成听说的，所以算【设计】也对",
+      "class": "H 互相提到",
+      "file": "granny.json",
+      "tokens": [
+        "zhou_taken"
+      ],
+      "also": [
+        {
+          "file": "zh.csv",
+          "tokens": [
+            "granny_last_cold"
+          ]
+        }
+      ],
+      "severity": "轻",
+      "kinds": [
+        "persona",
+        "ledger"
+      ],
+      "static": false,
+      "soft": true
+    },
+    {
+      "id": "T12",
+      "what": "老周留下的旧铜扣放在桌上。桌上的东西按图的形状判定点中，铜扣的图只有约 6% 点得到；第 7 天收摊时桌上没收的会被扫掉，接着就是结局，没有第二次机会。答应让他躲的玩家很可能拿不到这条线唯一的回报",
+      "class": "K 交互 / C 东西和钱",
+      "file": "items.json",
+      "tokens": [
+        "old_button"
+      ],
+      "also": [
+        {
+          "file": "_image_hits.md",
+          "tokens": [
+            "old_button"
+          ]
+        },
+        {
+          "file": "settings.json",
+          "tokens": [
+            "pixel",
+            "sweepAtClose"
+          ]
+        },
+        {
+          "file": "zhou.json",
+          "tokens": [
+            "old_button"
+          ]
+        },
+        {
+          "file": "README.md",
+          "tokens": [
+            "透明处",
+            "扫掉"
+          ]
+        }
+      ],
+      "severity": "中",
+      "kinds": [
+        "persona",
+        "softlock"
+      ],
+      "static": true,
+      "note": "审查员不看图：面积是静态表 _image_hits.md 量的。只报「图点得到的面积小」不算说到点上，要接上 table.hit = pixel 和收摊扫掉：人抽看"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "N1",
+      "what": "阿婆的「又来打扰了」在 again 表里，只有第二次以后才说：不是第一次就说「又」",
+      "file": "zh.csv",
+      "tokens": [
+        "granny_again_1"
+      ],
+      "also": [
+        {
+          "file": "granny.json",
+          "tokens": [
+            "granny_again_1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "what": "老周的「还是粗茶」同理，在 again 表里",
+      "file": "zh.csv",
+      "tokens": [
+        "zhou_again_1"
+      ],
+      "also": [
+        {
+          "file": "zhou.json",
+          "tokens": [
+            "zhou_again_1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "what": "阿婆被拒绝两次就不来：第一次被拒绝时有一句警告（granny_warn），是有预兆的。只报「没有预兆」算误报；报「钱不够导致只能拒绝」是 T8",
+      "file": "zh.csv",
+      "tokens": [
+        "granny_warn"
+      ],
+      "also": [
+        {
+          "file": "granny.json",
+          "tokens": [
+            "granny_warn",
+            "afterRefused"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "what": "拒绝老周以后没有后话：说明文档写明了「拒绝：他走了，没有后话」。按问题报算误报，放进「要定」不算",
+      "file": "zhou.json",
+      "tokens": [
+        "btn_refuse"
+      ],
+      "also": [
+        {
+          "file": "zh.csv",
+          "tokens": [
+            "btn_refuse"
+          ]
+        }
+      ],
+      "designOk": true
+    },
+    {
+      "id": "N5",
+      "what": "粗茶的图点得到的不到 10%，但它在货架上，货架按整格判定（shelf.hit = cell）：点格子就拿得起来，不是问题",
+      "file": "_image_hits.md",
+      "tokens": [
+        "coarse_brick"
+      ],
+      "also": [
+        {
+          "file": "items.json",
+          "tokens": [
+            "coarse_brick"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N6",
+      "what": "提示图标点得到的不到 10%，但它只是给玩家看的，本来就不能点（hints.clickable = false）：不是问题",
+      "file": "_image_hits.md",
+      "tokens": [
+        "hint_icon"
+      ],
+      "also": [
+        {
+          "file": "settings.json",
+          "tokens": [
+            "hint_icon",
+            "clickable"
+          ]
+        }
+      ]
+    }
+  ],
+  "wants": [
+    {
+      "id": "W-A",
+      "what": "阿婆钱不够时，好心的玩家想先赊给她、或者送她一壶；只有「照价卖 / 少收一点 / 不卖」。少收 3 文以后她够了，但不肯少收的玩家只能不卖",
+      "file": "zh.csv",
+      "tokens": [
+        "btn_sell",
+        "btn_discount",
+        "btn_refuse"
+      ],
+      "also": [
+        {
+          "file": "granny.json",
+          "tokens": [
+            "budget"
+          ]
+        },
+        {
+          "file": "settings.json",
+          "tokens": [
+            "discount"
+          ]
+        }
+      ],
+      "kinds": [
+        "wants",
+        "persona"
+      ]
+    },
+    {
+      "id": "W-B",
+      "what": "第 6 天老周求躲一晚：只有「让他躲 / 不卖（拒绝）/ 去报官」。想给他点钱或茶让他走、想劝他去别处、想问清楚再决定的玩家没有选项",
+      "file": "zhou.json",
+      "tokens": [
+        "btn_shelter",
+        "btn_report",
+        "day6"
+      ],
+      "also": [
+        {
+          "file": "zh.csv",
+          "tokens": [
+            "btn_shelter",
+            "btn_report",
+            "zhou_ask_1"
+          ]
+        }
+      ],
+      "kinds": [
+        "wants",
+        "persona"
+      ]
+    },
+    {
+      "id": "W-C",
+      "what": "报官以后老周没有任何回话（另外两个选项都有 reply），当晚玩家看不到任何反应，要到第二天早上的小结才知道",
+      "file": "zhou.json",
+      "tokens": [
+        "btn_report"
+      ],
+      "kinds": [
+        "wants",
+        "persona",
+        "walkthrough"
+      ]
+    }
+  ]
+}

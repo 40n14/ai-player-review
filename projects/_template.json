@@ -1,0 +1,100 @@
+{
+  "_说明": "空白的项目设置。要审一个新游戏 / 模组：复制这份，改名成 <项目id>.json（别用 _ 开头：_ 开头的不算项目文件），照每个字段的说明填。填好的小例子在 examples\\tea-stall\\project.json。不用的字段可以删掉或留空。",
+  "_路径": "路径可以写绝对路径，也可以写相对路径 = 相对于这份文件所在的文件夹；可以用 %环境变量%。JSON 里反斜杠写两个。",
+  "_怎么验证": "填完先不花钱地跑两步：python -I static\\run_all.py --project <这份> <临时文件夹>（必需的路径不对会报错、退出码 2）；再 api\\player_review_api.ps1 -ProjectFile <这份> -DryRun 看任务文件。",
+
+  "id": "",
+  "name": "",
+  "_language说明": "报告和离线页面的语言：zh（默认）或 en。",
+  "language": "zh",
+  "_ownerName说明": "拿主意的人在报告和任务里怎么称呼（「要〈称呼〉定」）。不写 = 负责人。",
+  "ownerName": "",
+
+  "_项目说明": "projectRoot = 项目文件夹（API 模式的工作目录、install.ps1 装进去的地方）；rulesFile = 项目自己的规矩（CLAUDE.md 一类），审查员第二个读。",
+  "projectRoot": "",
+  "rulesFile": "",
+
+  "_作品说明": "modSource = 作品的源码和数据；modReadme + readmeSections = 给审查员读的说明文档和要读的小节；characterDir / behaviourDir / frameworkDir = 角色（或关卡、任务）的数据、它们的行为代码、框架代码：只是告诉审查员去哪读，什么格式都行；csv = 两种语言的文本表（每行 键,文字，# 开头是注释），自带的文字检查要它。文本不是这种格式的，先转一份。",
+  "modSource": "",
+  "modReadme": "",
+  "readmeSections": [],
+  "characterDir": "",
+  "behaviourDir": "",
+  "frameworkDir": "",
+  "csv": { "zh": "", "en": "" },
+
+  "_玩法说明": "playUnit = 玩家的一个回合叫什么（天、关、章、回合、一次来访）。playLoop = 一个回合里玩家按顺序看到的界面，一项一个；画像走查照这个顺序走。不写：审查员自己从说明和代码里理出来，写在报告开头。",
+  "playUnit": "天",
+  "playLoop": [],
+
+  "_测试说明": "只写进说明给审查员看（写测试步骤时用），审查员不跑。",
+  "testsDir": "",
+  "testRunner": "",
+  "testLogs": "",
+
+  "_资料说明": "notesDir = 项目的笔记文件夹；loreBible + loreSections = 设定集和要读的节；characterNotes、changeReports 可以带 *；previousReviews = 以前的审查和改动报告（审查员照现在的代码核对，不跳过）。",
+  "notesDir": "",
+  "loreBible": "",
+  "loreSections": "",
+  "characterNotes": "",
+  "changeReports": "",
+  "previousReviews": [],
+
+  "_输出说明": "reviewOutDir = 报告写到哪（每次一个日期或时间的子文件夹）；staticOutDir = 只跑静态表、没给输出文件夹时写到哪。reportNames 不写也行（默认的名字在 api\\texts.json）；{0} = 组 id，{1} = 这一份的 name（自定义模板）或 id（英文默认名）。",
+  "reviewOutDir": "",
+  "staticOutDir": "",
+  "reportNames": {},
+
+  "_规矩说明": "readOnlyPaths = 审查员不许改的地方（API 模式也传给启动脚本）；neverRead = 这个项目里不许读、列、搜的地方（整台电脑都不许读的写在机器设置 local.json）；projectRules = 给审查员的项目规矩，一条一句（哪些脚本不许跑、哪些内容不许写进报告）；checklistExtra = 接在审查员清单后面、这个作品特有的要问的事。",
+  "readOnlyPaths": [],
+  "neverRead": [],
+  "projectRules": [],
+  "checklistExtra": [],
+
+  "_判定和数据说明": "都可以不写。invariants = 作者认定永远该成立的事，一条一句（例：没钥匙不能通关；死了的角色不再说话；同一件一次性奖励只发一次）：审查员拿它当判定标准，软锁、经济、事实账本几种走法尤其用得上。dataTables = 数值和清单在哪（价格、奖励、物品、成就、结局条件……），每项 { \"name\", \"path\", \"what\" }：经济走法和「全收集」画像先读它。newPlayerTasks = 新手一定要做的三五件事，一条一句：认知走查用。",
+  "invariants": [],
+  "dataTables": [],
+  "newPlayerTasks": [],
+
+  "_reviewFocus说明": "这次审查的重点：一段话，进每个任务的最前面。没有就写空字符串。",
+  "reviewFocus": "",
+
+  "_personaOverlay说明": "这个项目的画像对照层（一份 Markdown）：这个作品里什么算善、什么算守规矩（执法方是谁）、「守不守规矩会碰到的地方」那张表、每个画像对每个角色具体怎么玩、会说的话、去查哪、测试步骤。标题用和 method\\画像.md 一样的编号。例子：examples\\tea-stall\\画像对照.md。还没写就留空：审查员按通用层自己推，并在报告里说明。",
+  "personaOverlay": "",
+  "_presets说明": "预设：一类游戏一份现成的画像对照（工具包的 presets\\<id>\\画像对照.md），写 id 的列表，例 [\"shop-law\"]。审查员读的顺序：通用层 → 预设 → 上面这个项目的对照层，后面的为准。有哪些预设：prk presets。没有合适的就留空。",
+  "presets": [],
+
+  "_staticTables说明": "跑哪几张静态表。自带两张：text（文字检查，只要两个文本表）、images（图片点得到的面积：要在下面的 static.images.dirs 里写图在哪；审查员不看图，玩家要用鼠标点、拖东西的作品建议加上）。照这个作品的数据格式写的表（流程表、连续性表、交互表……）登记成对象：{ \"id\": \"flow\", \"script\": \"tables\\\\flow.py\", \"out\": \"_flow_table.md\", \"filter\": \"only\", \"requires\": [\"characterDir\"], \"firstLook\": [ { \"head\": \"一、可疑处\", \"what\": \"条件和结局对不上\" } ] }。脚本的调用方式见 static\\run_all.py 开头。不写这个字段 = 只跑 text。",
+  "staticTables": [ "text" ],
+
+  "_reviewGroups说明": "审查组：一组派一个审查员。kind = 审查种类（kinds\\kinds.json 里登记的 id，不写 = persona）；personas = method\\画像.md 的编号和名字，一组不超过四个（一两个善恶画像 + 一两个玩法画像）。defaultGroups = 正式审查默认派哪几组，顺序就是优先级。下面是一份起步用的；照作品的类型换画像：prk suggest <游戏类型>，或看 method\\画像_索引.md 末尾的表。32 以后的画像先看它的「适用」。",
+  "reviewGroups": [
+    { "id": "A", "name": "举报和动手（后果最重）", "kind": "persona", "personas": [ "21 举报者（守法恶）", "3 狠人（混乱恶）", "14 反复读档的人", "18 点得飞快、不读字的人" ] },
+    { "id": "B", "name": "为了帮人犯规", "kind": "persona", "personas": [ "20 侠盗（混乱善）", "15 第一次玩、不懂原版的人", "5 囤货的人", "13 早早关店的人" ] },
+    { "id": "V", "name": "看人下菜碟、半路变脸", "kind": "persona", "personas": [ "23 看人下菜碟", "24 半路变脸", "17 一句一句细读的人", "11 只看另一种语言的人" ] },
+    { "id": "D", "name": "好心人和第二局", "kind": "persona", "personas": [ "1 好心人（中立善）", "25 二周目反过来玩", "8 带着老存档玩到一半的人", "10 关掉部分内容的人" ] },
+    { "id": "E", "name": "全拿齐、摸边角、对着干", "kind": "persona", "personas": [ "26 全收集的人", "27 探索者（捅边角的人）", "28 对着干的人" ] },
+    { "id": "F", "name": "回来的人和只玩开头的人", "kind": "persona", "personas": [ "29 隔了很久回来的人", "30 只玩开头的人", "15 第一次玩、不懂原版的人" ] },
+    { "id": "Q", "name": "想要的选项（缺的选项、设置、反应）", "kind": "wants", "personas": [ "1 好心人（中立善）", "19 守法的好人（守法善）", "28 对着干的人", "45 按人设选的人（角色扮演）" ] },
+    { "id": "S", "name": "软锁 / 卡死", "kind": "softlock", "personas": [ "4 马虎的人", "28 对着干的人", "14 反复读档的人" ] },
+    { "id": "M", "name": "经济和数值漏洞", "kind": "economy", "personas": [ "2 精明生意人（中立中立）", "14 反复读档的人" ] },
+    { "id": "W", "name": "认知走查（新手）", "kind": "walkthrough", "personas": [ "15 第一次玩、不懂原版的人" ] },
+    { "id": "T", "name": "巡游包：取消 / 重复 / 错序 / 设置", "kind": "tours", "personas": [] },
+    { "id": "L", "name": "事实账本", "kind": "ledger", "personas": [ "17 一句一句细读的人" ] },
+    { "id": "N", "name": "无障碍清单", "kind": "a11y", "personas": [ "16 手柄 / 掌机 / 小屏的人" ] },
+    { "id": "C", "name": "内容清单", "kind": "content", "personas": [] },
+    { "id": "P", "name": "补丁面和卸载（作品是模组才用）", "kind": "modsurface", "personas": [ "9 半路装上模组的人", "12 开着别的大型模组的人" ] },
+    { "id": "I", "name": "交互：作品的东西 × 宿主的界面（作品是模组才用，要有 interaction 一节）", "kind": "interaction", "personas": [ "5 囤货的人", "4 马虎的人" ] }
+  ],
+  "_defaultGroups说明": "起步建议：后果最重、读代码最能定的排前面。一组一个审查员，组越多越花额度：第一次先派两三组，看找到的值不值，再加。",
+  "defaultGroups": [ "S", "A", "Q", "M", "B", "V", "D" ],
+
+  "_characterSplits说明": "API 模式 -SplitByCharacters 才用：把作品分成几份，每组 × 每份一个审查员。每份 id（只用英文字母、数字、_、-）、name（进报告文件名）、characters（这一份要走完的角色 / 关卡 / 章节）、minor（跟着走的次要的）、note（一句话说和别的份有什么牵连）。splitUnitName = 这个单位叫什么（不写 = 人物）。不拆就留空。",
+  "splitUnitName": "",
+  "characterSplits": [],
+
+  "_static说明": "文字检查的词表和规则：historyWords（暗示以前来过的词）、pairedWords（两种语言里说同一种关系的词）、spoilers（玩家还不该知道的事：词 + 早早看得到的键）、hiddenNameKeys（不给玩家看的名字）、claims（说明文字里的数字和设置文件对照：keys、zh / en 正则用 (?P<n>…) 抓数字、file、path、unit）、ignoreKeys、draftMarkers、sourceExts（作品源码的扩展名）。都可以不写，脚本有默认值。images 是图片表用的：{ \"dirs\": [ 玩家要点、要拖的东西的图所在的文件夹 ], \"cellSize\": 格子边长（可选）, \"minOpaque\": 点得到的不到百分之几算可疑（默认 50）, \"skip\": 不量的相对路径正则（可选） }。写法见 examples\\tea-stall\\project.json。",
+  "static": {},
+
+  "_interaction说明": "作品是模组时才用（交互走法 interaction 要它）：vanillaSource = 宿主游戏的源码或反编译源码；table = 现成的交互表（没有就不写）；itemSurfaces / characterSurfaces = 宿主游戏的界面和系统清单，每项 { \"name\": \"背包和仓库\", \"files\": \"宿主文件名的正则\", \"needsScreen\": true }。清单也没有时审查员会自己从宿主源码里列，但会慢、会漏。不是模组就删掉这一节。"
+}

@@ -1,0 +1,51 @@
+# 评测打分
+
+答案表：`eval\tea-stall\answers.json`（真问题 12 个，缺口 3 个，诱饵 6 个）。一共 1 轮：20261119_181306
+
+粗配：按「文件名 + 原文里的词」对。对上了不等于说对了，人要抽看。
+
+## 审查员的报告（几份合起来）
+
+| 题 | 是什么 | 该由谁找到 | 静态表能抓 | 找到几轮 / 1 | 在哪找到的（第一轮） |
+|---|---|---|---|---|---|
+| T1 | 老周被拒绝后的那句只有中文，英文版会显示键名 | persona | 能 | 1 | player-review_A.md M4；player-review_B.md M2 |
+| T2 | 阿婆送花那句英文没翻 | persona | 能 | 1 | player-review_A.md M1 |
+| T3 | 阿婆道谢那句中文有 {0}、英文没有 | persona | 能 | 1 | player-review_M.md L1 |
+| T4 | 老周道谢那句是占位的字，玩家会看到「（占位）」 | persona | 能 | 1 | player-review_A.md S1；player-review_A.md L2；player-review_B.md S1 |
+| T5 | 设置说明提前说出老周是逃兵（设定是第 6 天才知道） | persona、content | 能 | 1 | player-review_A.md M2；player-review_B.md M1；player-review_S.md M1 |
+| T6 | 说明页说同时招待三位，设置里座位是 2 | persona、walkthrough | 能 | 1 | player-review_A.md M3；player-review_M.md M1 |
+| T7 | 阿婆第一次来就说「老样子」 | persona、ledger | 不能 | 1 | player-review_A.md L1 |
+| T8 | 阿婆的钱（10）不够一壶茉莉（12）：不少收就只能不卖，两次以后她不再来。不肯少收的玩家被惩罚 | persona、softlock、economy | 不能 | 1 | player-review_A.md D1；player-review_M.md D1；player-review_S.md D1 |
+| T9 | 第 7 天：老周没被带走、少收不到两次时，阿婆最后一天没有任何台词 | persona、ledger | 不能 | 1 | player-review_A.md M1；player-review_B.md D1；player-review_M.md D1 |
+| T10 | 第 7 天：老周被带走、又少收过两次时，阿婆说冷话「茶我不喝了」却照样送花 | persona、ledger | 不能 | 1 | player-review_A.md M1；player-review_B.md D1；player-review_M.md D1 |
+| T11（软） | 老周第 6 天才说来历，但阿婆隔天来（1、3、5、7），第 6 天不在；她第 7 天却知道「昨夜把人带走了」。可以解释成听说的，所以算【设计】也对 | persona、ledger | 不能 | 0 |  |
+| T12 | 老周留下的旧铜扣放在桌上。桌上的东西按图的形状判定点中，铜扣的图只有约 6% 点得到；第 7 天收摊时桌上没收的会被扫掉，接着就是结局，没有第二次机会。答应让他躲的玩家很可能拿不到这条线唯一的回报 | persona、softlock | 能 | 1 | player-review_A.md S1；player-review_B.md S1；player-review_S.md S1 |
+
+- 至少一轮找到：**11 / 12**；每一轮都找到：**11 / 12**
+- 埋好的缺口（玩家想要、作品没给的）：至少一轮找到 **3 / 3**（W-A×1、W-B×1、W-C×1）
+- 诱饵被当成问题报了 **1** 次（N1×0、N2×0、N3×0、N4×1、N5×0、N6×0）；其中标【确定】的 1 次
+- 发现一共 28 条；对不上答案表的 2 条（人看：可能是没埋但真的问题，补进答案表；也可能是误报）
+  - 20261119_181306：player-review_Q.md W3（game/README.md）；player-review_Q.md D1（game/README.md）
+
+## 最后的合并报告
+
+| 题 | 是什么 | 该由谁找到 | 静态表能抓 | 找到几轮 / 1 | 在哪找到的（第一轮） |
+|---|---|---|---|---|---|
+| T1 | 老周被拒绝后的那句只有中文，英文版会显示键名 | persona | 能 | 1 | player-review_merged.md M3 |
+| T2 | 阿婆送花那句英文没翻 | persona | 能 | 1 | player-review_merged.md M5 |
+| T3 | 阿婆道谢那句中文有 {0}、英文没有 | persona | 能 | 1 | player-review_merged.md L3 |
+| T4 | 老周道谢那句是占位的字，玩家会看到「（占位）」 | persona | 能 | 1 | player-review_merged.md M4；player-review_merged.md M5 |
+| T5 | 设置说明提前说出老周是逃兵（设定是第 6 天才知道） | persona、content | 能 | 1 | player-review_merged.md M1 |
+| T6 | 说明页说同时招待三位，设置里座位是 2 | persona、walkthrough | 能 | 1 | player-review_merged.md M2 |
+| T7 | 阿婆第一次来就说「老样子」 | persona、ledger | 不能 | 1 | player-review_merged.md L1 |
+| T8 | 阿婆的钱（10）不够一壶茉莉（12）：不少收就只能不卖，两次以后她不再来。不肯少收的玩家被惩罚 | persona、softlock、economy | 不能 | 1 | player-review_merged.md D1 |
+| T9 | 第 7 天：老周没被带走、少收不到两次时，阿婆最后一天没有任何台词 | persona、ledger | 不能 | 1 | player-review_merged.md S1；player-review_merged.md M5；player-review_merged.md D1 |
+| T10 | 第 7 天：老周被带走、又少收过两次时，阿婆说冷话「茶我不喝了」却照样送花 | persona、ledger | 不能 | 1 | player-review_merged.md S1；player-review_merged.md M5；player-review_merged.md D1 |
+| T11（软） | 老周第 6 天才说来历，但阿婆隔天来（1、3、5、7），第 6 天不在；她第 7 天却知道「昨夜把人带走了」。可以解释成听说的，所以算【设计】也对 | persona、ledger | 不能 | 1 | player-review_merged.md M5；player-review_merged.md D2 |
+| T12 | 老周留下的旧铜扣放在桌上。桌上的东西按图的形状判定点中，铜扣的图只有约 6% 点得到；第 7 天收摊时桌上没收的会被扫掉，接着就是结局，没有第二次机会。答应让他躲的玩家很可能拿不到这条线唯一的回报 | persona、softlock | 能 | 1 | player-review_merged.md S1；player-review_merged.md M4 |
+
+- 至少一轮找到：**12 / 12**；每一轮都找到：**12 / 12**
+- 埋好的缺口（玩家想要、作品没给的）：至少一轮找到 **3 / 3**（W-A×1、W-B×1、W-C×1）
+- 诱饵被当成问题报了 **1** 次（N1×0、N2×0、N3×0、N4×1、N5×0、N6×0）；其中标【确定】的 1 次
+- 发现一共 15 条；对不上答案表的 0 条（人看：可能是没埋但真的问题，补进答案表；也可能是误报）
+

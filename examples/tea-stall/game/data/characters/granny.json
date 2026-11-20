@@ -1,0 +1,19 @@
+{
+  "id": "granny",
+  "nameKey": "granny_name",
+  "visits": { "firstDay": 1, "everyDays": 2 },
+  "wants": "jasmine",
+  "budget": 10,
+  "lines": {
+    "first": [ "granny_first_1", "granny_first_2" ],
+    "again": [ "granny_again_1" ],
+    "afterDiscount": [ "granny_thanks" ],
+    "afterRefused": [ "granny_warn" ],
+    "lastDay": [
+      { "when": "flag:zhou_taken", "line": "granny_last_cold" },
+      { "when": "discounts>=2", "line": "granny_last_warm" }
+    ]
+  },
+  "leaveForever": { "refusedInARow": 2 },
+  "gift": { "day": 7, "when": "discounts>=2", "item": "dried_flowers" }
+}

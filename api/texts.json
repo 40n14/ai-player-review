@@ -1,0 +1,152 @@
+{
+  "_说明": "player_review_api.ps1 和 run_result.ps1 用到的中文都在这里（两个 .ps1 只写英文：Windows PowerShell 5.1 会把没有 BOM 的中文读坏）。{{X}} 是脚本填进去的。",
+
+  "_title说明": "任务的名字：写在任务文件开头、花费表的「任务」一列、合并任务的「没写出来」里。",
+  "titleSplit": "{{GROUP}} · {{SPLIT}}",
+  "titleGroupMerge": "{{GROUP}} · 合并",
+  "titleFinalMerge": "合并",
+  "listSep": "、",
+  "headlessTitle": "（API 模式）",
+  "headlessIntro": "你是用 API 启动的、没有界面的 Claude Code。",
+  "taskIntro": "你正在做这次检查分配给你的任务。",
+
+  "_focus说明": "项目设置的 reviewFocus（这次的重点）写进每个任务的最前面。没有就整行去掉。",
+  "focusLine": "- **这次的重点**（项目设置的 reviewFocus，每个审查员都照它多看一眼；报告「结论」里单独说一句这一块查得怎样）：{{FOCUS}}",
+  "focusLineMerge": "- **这次的重点**（项目设置的 reviewFocus）：{{FOCUS}} 合并报告「结论」里单独说一句这一块找到了什么。",
+  "scopeAllNote": "（ALL = 全部）",
+  "_split说明": "按份拆分（-SplitByCharacters）时任务文件里的「范围」。每种审查的范围怎么写，在 kinds\\kinds.json 那一种的 splitScope 里（{{UNIT}} 单位的叫法、{{ITEMS}} 这一份的东西、{{MINOR}}、{{NOTE}}）。下面是公用的小块和默认值。",
+  "unitDefault": "人物",
+  "nothingListed": "（没有）",
+  "_map说明": "作品地图那一行。地图是审查前的准备环节（kinds\\map.md）写的几张表。",
+  "mapLine": "{{DIR}}（先读里面的 _map.md，再读你用得上的那几张表。地图是线索不是结论：用里面的事实以前，打开它给的出处核一眼；地图不在、没写完、或和代码对不上，以代码为准，并在报告的「这次没走到的」里说一句）",
+  "mapNone": "这次没有建地图，自己读代码和数据",
+  "othersSep": "；",
+  "_decisions说明": "一轮一轮转的账：负责人对每条反馈的决定，记在 reviewOutDir 下的这个文件里（技能第 7 步写）。下一轮的审查员从它开始核对。",
+  "decisionsFile": "决定记录.csv",
+  "decisionsLine": "{{PATH}}（这不是第一轮。照审查员说明里「上一轮的决定记录」做：同一报告里的同一编号有多行时，用最后一行的决定。说了修的回头核，说了是设计的不再报；报告里写「上一轮反馈的去向」）",
+  "decisionsNone": "没有（这是第一轮）",
+  "citesNone": "（这次没有跑）",
+  "citesIfPresent": "{{PATH}}（文件存在时先读；没写出来就直接核对报告引用的源码和数据）",
+  "_report说明": "项目设置没写 reportNames 时用的报告文件名。{0} = 组 id，{1} = 这一份的 name。",
+  "reportGroupDefault": "玩家视角审查_{0}.md",
+  "reportGroupMergedDefault": "玩家视角审查_{0}_合并.md",
+  "reportMergedDefault": "玩家视角审查_合并.md",
+  "expandReportDefault": "内容拓展提案.md",
+  "geminiSigninUnsupported": "Gemini CLI 暂不支持会员登录",
+  "ledgerPending": "检查做完了，但账没记上",
+  "expandFailed": "提案失败，请看这一次的日志",
+  "expandAllItems": "合并报告里全部「想要但没有的」（W），和「要定」（D）里推荐选项是加内容的",
+  "ownerDefault": "负责人",
+  "kindLine": "{{NAME}}（{{ID}}）。走法全文在本文件最后「走法」一节，照它走",
+  "splitScopeFallback": "{{UNIT}} {{ITEMS}}{{MINOR}}。照走法只看这几个{{UNIT}}，没走完的在报告的「这次没走到的」里写清。别的{{UNIT}}只在牵连到时看（牵连：{{NOTE}}）",
+  "splitMinor": "（次要的 {{MINOR}} 跟着走）",
+  "scopeWhole": "。这一轮整体：{{SCOPE}}",
+
+  "_merge说明": "合并任务里说明这是哪一级。按份拆分、不止一组时分两级：先每组合并自己的几份，再合并各组。",
+  "mergeLevelGroup": "- 这一级：输入是 {{GROUP}} 这一组拆开的几份（同一组，看的范围不同）。照合并说明全部做完（筛掉、合并同一根源、回代码核对、对照旧的）；两份都报的牵连合成一条。",
+  "mergeLevelNext": "后面还有一级把各组合起来：每一条都写清「核对：」，下一级就不再核对。",
+  "mergeLevelFinal": "- 这一级：第二级合并。输入是各组已经合并过的报告（每组拆过几份，组里已经筛过、核对过、对照过旧的）。写了「核对：」的不再重复核对；只核对两组结论相反的、和只有一组报的严重。重点是跨组合并同一根源，严重度取最高的，「哪几组报的」写全。",
+  "missingNoReport": "没写出报告",
+  "missingIfAny": "若上面列的报告有没写出来的，在合并报告里注明；只合并实际写出的报告。第二级若缺一组的合并报告，可以读这一组拆开的报告，仍须回到出处核对。",
+  "missingShaky": "报告可能没写完",
+  "missingGroupMerge": "这一组的合并没写出来，输入里直接给了这一组拆开的几份（没核对过，这一级要照合并说明全部做）",
+
+  "_fakeFix说明": "只给测试用：假 runner（fake_runner.ps1）假装修待修清单里的一条时，认任务文件里的哪几行、往清单里填什么。{{FILE}} = 它改的文件。",
+  "fakeFix": {
+    "taskMark": "修一个问题",
+    "listLine": "^清单文件[：:]\\s*(.+?)\\s*$",
+    "itemLine": "^这一条[：:]\\s*(F\\d+)",
+    "doneHeading": "修完填这里",
+    "fill": "- 改了：`{{FILE}}`：假 runner 在文件最后加了一行 FAKE-FIX（测试用，不是真的修）\n- 自己核过：没有（这是假 runner）\n- 要进游戏看的：没有\n- 没把握的：没有\n- 顺手看到的：没有",
+    "fillNoFile": "- 改了：没有改文件（假 runner：没设环境变量 FAKE_FIX_ROOT，或者这一条没写出处）\n- 自己核过：没有（这是假 runner）\n- 要进游戏看的：没有\n- 没把握的：没有\n- 顺手看到的：没有"
+  },
+
+  "_cost说明": "花费表（reportNames.cost，默认 _花费.md）。每个任务结束都重写一次，跑到一半也看得到。",
+  "cost": {
+    "file": "_花费.md",
+    "title": "# API 审查花费",
+    "head": "文件夹：`{{DIR}}`\n开跑：{{START}}　更新：{{NOW}}　模型：{{MODEL}}　同时最多：{{CAP}} 个任务\n花费、步数、用时都从每个日志最后那行 JSON 读（`total_cost_usd`、`num_turns`、`duration_ms`）；成功 = `is_error` 是 false、`subtype` 是 success，而且这一轮写了报告；没有 JSON 算出错（写上退出码）。审查员的回话是 JSON 里的 `result`，在日志里。",
+    "columns": "| 任务 | 结果 | 报告 | 花费（美元） | 步数 | 用时 | 日志 |\n|---|---|---|---|---|---|---|",
+    "total": "**合计**",
+    "totalNote": "{{N}} 个任务：成功 {{OK}}，出错 {{BAD}}，还没跑完 {{OPEN}}，跳过 {{SKIP}}",
+    "wall": "从开跑到现在 {{WALL}}（各任务加起来 {{SUM}}）",
+    "ok": "成功",
+    "error": "出错",
+    "okNoReport": "出错（CLI 说成功，但没写报告）",
+    "noJson": "没有结果 JSON",
+    "exit": "退出码",
+    "running": "在跑",
+    "pending": "排队",
+    "skipped": "跳过（没有报告可合并）",
+    "written": "写了",
+    "notWritten": "没写",
+    "sec": "{{S}} 秒",
+    "min": "{{M}} 分 {{S}} 秒",
+    "hour": "{{H}} 小时 {{M}} 分"
+  },
+  "files": {
+    "group": {
+      "zh": "玩家视角审查_{0}.md",
+      "en": "player-review_{0}.md"
+    },
+    "groupMerged": {
+      "zh": "玩家视角审查_{0}_合并.md",
+      "en": "player-review_{0}_merged.md"
+    },
+    "merged": {
+      "zh": "玩家视角审查_合并.md",
+      "en": "player-review_merged.md"
+    },
+    "expand": {
+      "zh": "内容拓展提案.md",
+      "en": "content-proposal.md"
+    },
+    "cost": {
+      "zh": "_花费.md",
+      "en": "_cost.md"
+    },
+    "decisions": {
+      "zh": "决定记录.csv",
+      "en": "decisions.csv"
+    },
+    "ledger": {
+      "zh": "花费记录.csv",
+      "en": "cost-ledger.csv"
+    },
+    "fixList": {
+      "zh": "待修清单.md",
+      "en": "fix-list.md"
+    },
+    "beforeFix": {
+      "zh": "_修之前",
+      "en": "_before-fix"
+    },
+    "fixDir": {
+      "zh": "_修",
+      "en": "_fix"
+    }
+  },
+  "deliveryInstruction": "Deliver all written outputs and your reply in English. Follow the English headings and markers in docs/report-format.md. The instructions and source material can be in Chinese: use their meaning and quote source text as written. Use the output paths specified in this task. If a review draft is required, use the .draft.md suffix. When delegating verification, pass these English delivery instructions along.",
+  "draftSuffix": { "zh": ".草稿.md", "en": ".draft.md" },
+  "costEn": {
+    "title": "# Review costs",
+    "head": "Folder: {{DIR}}\nStarted: {{START}} | Updated: {{NOW}} | Model: {{MODEL}} | Max concurrent tasks: {{CAP}}\nCosts, turns and duration come from each task log. Success requires a successful runner result and a report written in this run.",
+    "columns": "| Task | Result | Report | Cost (USD) | Turns | Duration | Log |\n|---|---|---|---|---|---|---|",
+    "total": "**Total**",
+    "totalNote": "{{N}} tasks: {{OK}} succeeded, {{BAD}} failed, {{OPEN}} open, {{SKIP}} skipped",
+    "wall": "Elapsed {{WALL}} ({{SUM}} across tasks)",
+    "ok": "Succeeded",
+    "error": "Failed",
+    "okNoReport": "Failed (runner succeeded without writing a report)",
+    "noJson": "No result JSON",
+    "exit": "exit code",
+    "running": "Running",
+    "pending": "Queued",
+    "skipped": "Skipped (no reports to merge)",
+    "written": "Written",
+    "notWritten": "Not written",
+    "sec": "{{S}} s",
+    "min": "{{M}} min {{S}} s",
+    "hour": "{{H}} h {{M}} min"
+  }
+}

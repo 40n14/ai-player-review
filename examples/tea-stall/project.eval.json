@@ -1,0 +1,82 @@
+{
+  "_说明": "例子项目：一个虚构的小游戏「茶摊」。只为了演示项目设置怎么填、验证工具包能跑。游戏内容都是编的。路径都是相对这份文件的。",
+
+  "id": "tea-stall-eval",
+  "name": "茶摊（评测用）",
+  "ownerName": "作者",
+
+  "projectRoot": ".",
+  "rulesFile": "game\\RULES.md",
+
+  "modSource": "game",
+  "modReadme": "game\\README.md",
+  "readmeSections": [ "一天怎么过", "桌上和货架", "客人", "结局" ],
+  "characterDir": "game\\data\\characters",
+  "behaviourDir": "game\\data",
+  "csv": { "zh": "game\\text\\zh.csv", "en": "game\\text\\en.csv" },
+
+  "playUnit": "天",
+  "playLoop": [ "早上：昨天的小结", "摆摊", "客人一个一个来", "客人说话", "客人点的东西和三个按钮（照价卖 / 少收一点 / 不卖）", "客人走", "收摊", "夜里：看账本" ],
+
+  "notesDir": "game",
+  "loreBible": "game\\README.md",
+  "loreSections": "「客人」一节",
+
+  "reviewOutDir": "review_out_eval",
+  "staticOutDir": "review_out_eval\\_static",
+
+  "readOnlyPaths": [ "game" ],
+  "neverRead": [ "..\\..\\eval" ],
+  "projectRules": [
+    "只读：不改 game 文件夹里的任何文件。",
+    "这个例子没有可以运行的游戏：要进游戏确认的，照样写出测试步骤。"
+  ],
+
+  "reviewFocus": "",
+  "personaOverlay": "画像对照_无提示.md",
+  "staticTables": [ "text", "images" ],
+
+  "reviewGroups": [
+    { "id": "A", "name": "好心人和算账的", "kind": "persona", "personas": [ "1 好心人（中立善）", "2 精明生意人（中立中立）", "17 一句一句细读的人" ] },
+    { "id": "B", "name": "举报和读档", "kind": "persona", "personas": [ "21 举报者（守法恶）", "14 反复读档的人", "18 点得飞快、不读字的人" ] },
+    { "id": "E", "name": "全拿齐和摸边角", "kind": "persona", "personas": [ "26 全收集的人", "27 探索者（捅边角的人）" ] },
+    { "id": "Q", "name": "想要的选项", "kind": "wants", "personas": [ "1 好心人（中立善）", "2 精明生意人（中立中立）", "21 举报者（守法恶）", "28 对着干的人" ] },
+    { "id": "S", "name": "软锁 / 卡死", "kind": "softlock", "personas": [ "4 马虎的人" ] },
+    { "id": "M", "name": "经济和数值漏洞", "kind": "economy", "personas": [ "2 精明生意人（中立中立）" ] },
+    { "id": "W", "name": "认知走查（新手）", "kind": "walkthrough", "personas": [] },
+    { "id": "L", "name": "事实账本", "kind": "ledger", "personas": [] }
+  ],
+  "defaultGroups": [ "A", "B", "Q", "S", "M" ],
+
+  "invariants": [
+    "阿婆的钱要够买她要的东西，至少在少收一点以后够。",
+    "第 6 天以前，玩家看得到的文字里不出现老周的来历。",
+    "阿婆第 7 天说的话，只能提到她可能知道的事。"
+  ],
+  "dataTables": [
+    { "name": "价钱和折扣", "path": "game\\data\\settings.json", "what": "prices、discount、stall.seats" },
+    { "name": "客人", "path": "game\\data\\characters", "what": "每位客人的 budget、来访日、台词表、选项" },
+    { "name": "东西", "path": "game\\data\\items.json", "what": "每件东西的图、在货架上还是在桌上" }
+  ],
+  "newPlayerTasks": [ "第一次卖出一壶茶", "第一次少收一点", "第 6 天回答老周" ],
+
+  "splitUnitName": "客人",
+  "characterSplits": [
+    { "id": "granny", "name": "阿婆", "characters": [ "granny" ], "minor": [], "note": "阿婆会提到老周" },
+    { "id": "zhou", "name": "老周", "characters": [ "zhou" ], "minor": [], "note": "老周的结局会改阿婆最后一天说的话" }
+  ],
+
+  "static": {
+    "spoilers": [
+      { "name": "老周的来历", "words": [ "逃兵", "deserter" ], "keys": [ "^option_", "^guide_" ],
+        "why": "设定：老周的来历要到第 6 天他自己说出来，设置说明和说明页不该先说。" }
+    ],
+    "claims": [
+      { "name": "同时招待几位客人", "keys": "^guide_",
+        "zh": "同时最多招待(?P<n>[0-9一二两三四五六七八九十]+)位", "en": "serve up to (?P<n>\\w+) guests",
+        "file": "game\\data\\settings.json", "path": "stall.seats" }
+    ],
+    "sourceExts": [ ".json" ],
+    "images": { "dirs": [ "game\\images" ], "cellSize": 16 }
+  }
+}

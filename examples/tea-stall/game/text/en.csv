@@ -1,0 +1,31 @@
+# Tea Stall: English text. One "key,text" per line (split at the first comma only). Lines starting with # are comments.
+# ==== options and guide ====
+option_hints,Show hints
+option_hints_tip,When on, guests get a small icon. Old Zhou is a deserter, so his icon is grey.
+guide_page_1,The stall can serve up to three guests at once. Guests leave if they wait too long.
+guide_page_2,Charge a little less and a guest remembers. Refuse and a guest remembers that too.
+
+# ==== granny ====
+granny_name,Granny
+granny_first_1,The usual. A pot of jasmine.
+granny_first_2,This stall is new, isn't it?
+granny_again_1,Sorry to trouble you again. Jasmine today as well.
+granny_thanks,You charged me less last time. I remember.
+granny_warn,You won't sell to me today... Do it again and I won't come back.
+granny_last_cold,...They took someone away last night. I won't have tea.
+granny_last_warm,这是我自己晒的花，你拿去泡。
+
+# ==== old zhou ====
+zhou_name,Guest
+zhou_first_1,Coarse tea. The cheapest.
+zhou_again_1,Coarse tea again.
+zhou_ask_1,...I ran from the camp. Can I hide behind your stall for a night?
+zhou_stay_thanks,(placeholder) Thanks.
+
+# ==== buttons and summary ====
+btn_sell,Sell at price
+btn_discount,Charge less
+btn_refuse,Refuse
+btn_shelter,Let him stay the night
+btn_report,Report him
+summary_taken,Someone was taken away last night.

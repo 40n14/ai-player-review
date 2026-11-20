@@ -1,0 +1,21 @@
+{
+  "id": "zhou",
+  "nameKey": "zhou_name",
+  "visits": { "days": [ 2, 4, 6 ] },
+  "wants": "coarse",
+  "budget": 4,
+  "lines": {
+    "first": [ "zhou_first_1" ],
+    "again": [ "zhou_again_1" ],
+    "day6": [ "zhou_ask_1" ]
+  },
+  "choices": {
+    "day6": [
+      { "button": "btn_shelter", "sets": "flag:zhou_sheltered", "reply": "zhou_stay_thanks" },
+      { "button": "btn_refuse", "reply": "zhou_refused" },
+      { "button": "btn_report", "sets": "flag:zhou_taken" }
+    ]
+  },
+  "gift": { "day": 7, "when": "flag:zhou_sheltered", "item": "old_button" },
+  "summary": { "day": 7, "when": "flag:zhou_taken", "line": "summary_taken" }
+}
